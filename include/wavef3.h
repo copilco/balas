@@ -4,7 +4,7 @@
 
 
 
-class wavefunction: public grid
+class field: public grid
 	{
 	public:
 		
@@ -58,8 +58,11 @@ class wavefunction: public grid
 			w23 = (fftw_complex*) fftw_malloc(n2*n3 * sizeof(fftw_complex));
 			if(!w) cout<<"\nError allocating array, please check ...";
 			
-			p3D_12F  =fftw_plan_dft_2d(n2,n1,w12,w12,-1, FFTW_ESTIMATE);
-			p3D_12B  =fftw_plan_dft_2d(n2,n1,w12,w12, 1, FFTW_ESTIMATE);
+			p3DF  =fftw_plan_dft_3d(n3,n2,n1,w,w,-1, FFTW_ESTIMATE);
+			p3DB  =fftw_plan_dft_3d(n3,n2,n1,w,w, 1, FFTW_ESTIMATE);
+			
+			p2D_12F  =fftw_plan_dft_2d(n2,n1,w12,w12,-1, FFTW_ESTIMATE);
+			p2D_12B  =fftw_plan_dft_2d(n2,n1,w12,w12, 1, FFTW_ESTIMATE);
 			
 			p2D_13F  =fftw_plan_dft_2d(n3,n1,w13,w13,-1, FFTW_ESTIMATE);
 			p2D_13B  =fftw_plan_dft_2d(n3,n1,w13,w13, 1, FFTW_ESTIMATE);
@@ -67,8 +70,15 @@ class wavefunction: public grid
 			p2D_23F  =fftw_plan_dft_2d(n3,n2,w23,w23,-1, FFTW_ESTIMATE);
 			p2D_23B  =fftw_plan_dft_2d(n3,n2,w23,w23, 1, FFTW_ESTIMATE);
 			
-			p2DF  =fftw_plan_dft_3d(n3,n2,n1,w,w,-1, FFTW_ESTIMATE);
-			p2DB  =fftw_plan_dft_3d(n3,n2,n1,w,w, 1, FFTW_ESTIMATE);
+			p1D_1F  =fftw_plan_dft_1d(n1,w1,w1,-1, FFTW_ESTIMATE);
+			p1D_1B  =fftw_plan_dft_1d(n1,w1,w1, 1, FFTW_ESTIMATE);
+			
+			p1D_2F  =fftw_plan_dft_1d(n2,w2,w2,-1, FFTW_ESTIMATE);
+			p1D_2B  =fftw_plan_dft_1d(n2,w2,w2, 1, FFTW_ESTIMATE);
+			
+			p1D_3F  =fftw_plan_dft_1d(n3,w3,w3,-1, FFTW_ESTIMATE);
+			p1D_3B  =fftw_plan_dft_1d(n3,w3,w3, 1, FFTW_ESTIMATE);
+			
 			
 			qnorm=0.;
 			expected_kin=0.;
@@ -194,10 +204,206 @@ class wavefunction: public grid
 			return qnorm;
 		}
 		
-		void fft_over1()
+		void fft_over1_F()
+		{
+			for(int k=0;k<n3;k++)
+				for(int j=0;j<n2;j++)
+				{
+					//Copy into the 1d array
+					for(int i=0;i<n1;i++)
+					{
+						w1[i][0]=w[index(k,j,i)][0];
+						w1[i][1]=w[index(k,j,i)][1];
+					}
+					
+					//Do the fft1d with the factor
+					fftw_execute(p1D_1F);
+					
+					for(int i=0;i<n1;i++)
+					{
+						w[index(k,j,i)][0]=w1[i][0];//*kfactor1;
+						w[index(k,j,i)][1]=w1[i][1];//*kfactor1;
+					}					
+				}//end double loop
+			
+		}//end of fft_over1_F()
+		
+		void fft_over1_B()
+		{
+			for(int k=0;k<n3;k++)
+				for(int j=0;j<n2;j++)
+				{
+					//Copy into the 1d array
+					for(int i=0;i<n1;i++)
+					{
+						w1[i][0]=w[index(k,j,i)][0];
+						w1[i][1]=w[index(k,j,i)][1];
+					}
+					
+					//Do the fft1d with the factor
+					fftw_execute(p1D_1B);
+					
+					for(int i=0;i<n1;i++)
+					{
+						w[index(k,j,i)][0]=w1[i][0];//*kfactor1;
+						w[index(k,j,i)][1]=w1[i][1];//*kfactor1;
+					}					
+				}//end double loop
+			
+		}//end of fft_over1_F()
+		
+		
+		void fft_over2_F()
+		{
+			for(int k=0;k<n3;k++)
+				for(int i=0;i<n1;i++)
+				{
+					//Copy into the 1d array
+					for(int j=0;j<n2;j++)
+					{
+						w2[j][0]=w[index(k,j,i)][0];
+						w2[j][1]=w[index(k,j,i)][1];
+					}
+					
+					//Do the fft1d with the factor
+					fftw_execute(p1D_2F);
+					
+					for(int j=0;j<n2;j++)
+					{
+						w[index(k,j,i)][0]=w2[j][0];//*kfactor1;
+						w[index(k,j,i)][1]=w2[j][1];//*kfactor1;
+					}					
+				}//end double loop
+			
+		}//end of fft_over1_F()
+		
+		void fft_over2_B()
+		{
+			for(int k=0;k<n3;k++)
+				for(int i=0;i<n1;i++)
+				{
+					//Copy into the 1d array
+					for(int j=0;j<n2;j++)
+					{
+						w2[j][0]=w[index(k,j,i)][0];
+						w2[j][1]=w[index(k,j,i)][1];
+					}
+					
+					//Do the fft1d without the factor
+					fftw_execute(p1D_2B);
+					
+					for(int j=0;j<n2;j++)
+					{
+						w[index(k,j,i)][0]=w2[j][0];//*kfactor1;
+						w[index(k,j,i)][1]=w2[j][1];//*kfactor1;
+					}					
+				}//end double loop
+			
+		}//end of fft_over2_B()
+		
+		
+		void fft_over3_F()
+		{
+			for(int j=0;j<n2;j++)
+				for(int i=0;i<n1;i++)
+				{
+					//Copy into the 1d array
+					for(int k=0;k<n3;k++)
+					{
+						w3[k][0]=w[index(k,j,i)][0];
+						w3[k][1]=w[index(k,j,i)][1];
+					}
+					
+					//Do the fft1d without the factor
+					fftw_execute(p1D_3F);
+					
+					for(int k=0;k<n3;k++)
+					{
+						w[index(k,j,i)][0]=w3[k][0];//*kfactor1;
+						w[index(k,j,i)][1]=w3[k][1];//*kfactor1;
+					}					
+				}//end double loop
+			
+		}//end of fft_over3_F()
+		
+		void fft_over3_B()
+		{
+			for(int j=0;j<n2;j++)
+				for(int i=0;i<n1;i++)
+				{
+					//Copy into the 1d array
+					for(int k=0;k<n3;k++)
+					{
+						w3[k][0]=w[index(k,j,i)][0];
+						w3[k][1]=w[index(k,j,i)][1];
+					}
+					
+					//Do the fft1d without the factor
+					fftw_execute(p1D_3B);
+					
+					for(int k=0;k<n3;k++)
+					{
+						w[index(k,j,i)][0]=w3[k][0];//*kfactor1;
+						w[index(k,j,i)][1]=w3[k][1];//*kfactor1;
+					}					
+				}//end double loop
+			
+		}//end of fft_over3_B()
+		
+		
+		void fft_over12_F()
+		{
+
+			for(int k=0;k<n3;k++)
+			{
+				
+				for(int j=0;j<n2;j++)
+					for(int i=0;i<n1;i++)
+					{
+						w12[in12(j,i)][0]=w[index(k,j,i)][0];
+						w12[in12(j,i)][1]=w[index(k,j,i)][1];
+					}
+					
+				//Do the fft1d without the factor
+				fftw_execute(p2D_12F);
+				
+				for(int j=0;j<n2;j++)
+					for(int i=0;i<n1;i++)
+					{
+						w[index(k,j,i)][0]=w12[in12(j,i)][0];
+						w[index(k,j,i)][1]=w12[in12(j,i)][1];
+					}					
+				}//end double loop
+			
+		}//end of fft_over12_F()
+		
+		void fft_over12_B()
 		{
 			
-		}
+			for(int k=0;k<n3;k++)
+			{
+				
+				for(int j=0;j<n2;j++)
+					for(int i=0;i<n1;i++)
+					{
+						w12[in12(j,i)][0]=w[index(k,j,i)][0];
+						w12[in12(j,i)][1]=w[index(k,j,i)][1];
+					}
+				
+				//Do the fft1d without the factor
+				fftw_execute(p2D_12B);
+				
+				for(int j=0;j<n2;j++)
+					for(int i=0;i<n1;i++)
+					{
+						w[index(k,j,i)][0]=w12[in12(j,i)][0];
+						w[index(k,j,i)][1]=w12[in12(j,i)][1];
+					}					
+			}//end double loop
+			
+		}//end of fft_over12_F()
+		
+		
 		
 		
 		
