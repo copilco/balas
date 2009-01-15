@@ -404,6 +404,109 @@ class field: public grid
 		}//end of fft_over12_F()
 		
 		
+		void fft_over13_F()
+		{
+			
+			for(int j=0;j<n2;j++)
+			{
+				
+				for(int k=0;k<n3;k++)
+					for(int i=0;i<n1;i++)
+					{
+						w13[in13(k,i)][0]=w[index(k,j,i)][0];
+						w13[in13(k,i)][1]=w[index(k,j,i)][1];
+					}
+				
+				//Do the fft2d without the factor
+				fftw_execute(p2D_13F);
+				
+				for(int k=0;k<n3;k++)
+					for(int i=0;i<n1;i++)
+					{
+						w[index(k,j,i)][0]=w13[in13(k,i)][0];
+						w[index(k,j,i)][1]=w13[in13(k,i)][1];
+					}					
+			}//end double loop
+			
+		}//end of fft_over13_F()
+		
+		void fft_over13_B()
+		{
+			
+			for(int j=0;j<n2;j++)
+			{
+				
+				for(int k=0;k<n3;k++)
+					for(int i=0;i<n1;i++)
+					{
+						w13[in13(k,i)][0]=w[index(k,j,i)][0];
+						w13[in13(k,i)][1]=w[index(k,j,i)][1];
+					}
+				
+				//Do the fft2d without the factor
+				fftw_execute(p2D_13B);
+				
+				for(int k=0;k<n3;k++)
+					for(int i=0;i<n1;i++)
+					{
+						w[index(k,j,i)][0]=w13[in13(k,i)][0];
+						w[index(k,j,i)][1]=w13[in13(k,i)][1];
+					}					
+			}//end double loop
+			
+		}//end of fft_over13_F()
+		
+		void fft_over23_F()
+		{
+			
+			for(int i=0;i<n1;i++)
+			{
+				
+				for(int k=0;k<n3;k++)
+					for(int j=0;j<n2;j++)
+					{
+						w23[in23(k,j)][0]=w[index(k,j,i)][0];
+						w23[in23(k,j)][1]=w[index(k,j,i)][1];
+					}
+				
+				//Do the fft2d without the factor
+				fftw_execute(p2D_23F);
+				
+				for(int k=0;k<n3;k++)
+					for(int j=0;j<n2;j++)
+					{
+						w[index(k,j,i)][0]=w23[in23(k,j)][0];
+						w[index(k,j,i)][1]=w23[in23(k,j)][1];
+					}					
+			}//end double loop
+			
+		}//end of fft_over23_F()
+		
+		void fft_over23_B()
+		{
+			
+			for(int i=0;i<n1;i++)
+			{
+				
+				for(int k=0;k<n3;k++)
+					for(int j=0;j<n2;j++)
+					{
+						w23[in23(k,j)][0]=w[index(k,j,i)][0];
+						w23[in23(k,j)][1]=w[index(k,j,i)][1];
+					}
+				
+				//Do the fft2d without the factor
+				fftw_execute(p2D_23B);
+				
+				for(int k=0;k<n3;k++)
+					for(int j=0;j<n2;j++)
+					{
+						w[index(k,j,i)][0]=w23[in23(k,j)][0];
+						w[index(k,j,i)][1]=w23[in23(k,j)][1];
+					}					
+			}//end double loop
+			
+		}//end of fft_over23_F()
 		
 		
 		

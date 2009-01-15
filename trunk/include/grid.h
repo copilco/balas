@@ -99,13 +99,13 @@ class grid
 		
 		int in13(int a, int b)
 		{
-			int index=a*n2*n1+b;
+			int index=a*n1+b;
 			return index;
 		}
 		
 		int in23(int a, int b)
 		{
-			int index=a*n2*n1+b*n1;
+			int index=a*n2+b;
 			return index;
 		}
 		
