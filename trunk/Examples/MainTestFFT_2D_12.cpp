@@ -94,7 +94,7 @@ int main()
 	 }
 
 
-	double factor=1./w1.n1/w1.n2;///w1.n3;  
+	double factor=1./w1.n2/w1.n3;///w1.n3;  
    /**********************/
 	w1.fft_over23_F();//fftw_execute(w1.p3DF);
    /**********************/
