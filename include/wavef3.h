@@ -252,7 +252,6 @@ class field: public grid
 			
 		}//end of fft_over1_F()
 		
-		
 		void fft_over2_F()
 		{
 			for(int k=0;k<n3;k++)
@@ -301,7 +300,6 @@ class field: public grid
 			
 		}//end of fft_over2_B()
 		
-		
 		void fft_over3_F()
 		{
 			for(int j=0;j<n2;j++)
@@ -349,7 +347,6 @@ class field: public grid
 				}//end double loop
 			
 		}//end of fft_over3_B()
-		
 		
 		void fft_over12_F()
 		{
@@ -402,7 +399,6 @@ class field: public grid
 			}//end double loop
 			
 		}//end of fft_over12_F()
-		
 		
 		void fft_over13_F()
 		{

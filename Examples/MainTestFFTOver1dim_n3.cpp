@@ -100,7 +100,7 @@ int main()
    double factor=1./w1.n1/w1.n2/w1.n3;  
    double factor1d=1./w1.n3;  
    /**********************/
-   w1.fft_over3_F();
+   w1.fft_over1_F();
    /**********************/
    
    for(int k=0;k<w1.n3;k++)
@@ -114,7 +114,7 @@ int main()
 	 }
    
    /**********************/
-   w1.fft_over3_B();
+   w1.fft_over1_B();
    /**********************/
    
    
