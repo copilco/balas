@@ -37,10 +37,32 @@ void gaussian(field w)
     for(int j=0;j<w.n2;j++)
       for(int i=0;i<w.n1;i++)
 	{ 	  
-	  w.w[w.index(k,j,i)][0]=   exp( -w.x1[i]*w.x1[i]-w.x2[j]*w.x2[j]-w.x3[k]*w.x3[k] )*sin(2.2*w.x2[j]);
+		w.w[w.index(k,j,i)][0]=   exp( -w.x1[i]*w.x1[i]-w.x2[j]*w.x2[j]-w.x3[k]*w.x3[k] );//*sin(2.2*w.x2[j]);
 	  //*cos(2.2*w.x2[j]);
 	  w.w[w.index(k,j,i)][1]=0.;//  exp( -w.x1[i]*w.x1[i]-w.x2[j]*w.x2[j]-w.x3[k]*w.x3[k] )*sin(2.2*w.x2[j]);;
 	}
+}
+
+void gaussianTrunc(field w)
+{
+	
+	for(int k=0;k<w.n3;k++)
+		for(int j=0;j<w.n2;j++)
+			for(int i=0;i<w.n1;i++)
+			{ 	  
+				w.w[w.index(k,j,i)][0]=   exp( -w.x1[i]*w.x1[i]-w.x2[j]*w.x2[j]-w.x3[k]*w.x3[k] );//*sin(2.2*w.x2[j]);
+				//*cos(2.2*w.x2[j]);
+				w.w[w.index(k,j,i)][1]=0.;//  exp( -w.x1[i]*w.x1[i]-w.x2[j]*w.x2[j]-w.x3[k]*w.x3[k] )*sin(2.2*w.x2[j]);;
+			}
+	
+	for(int k=w.n3/4;k<3*w.n3/4;k++)
+		for(int j=0;j<w.n2;j++)
+			for(int i=0;i<w.n1;i++)
+			{ 	  
+				w.w[w.index(k,j,i)][0]=0.;//   exp( (-w.x1[i]*w.x1[i]-w.x2[j]*w.x2[j]-w.x3[k]*w.x3[k])/0.8 );//*sin(2.2*w.x2[j]);
+				//*cos(2.2*w.x2[j]);
+				w.w[w.index(k,j,i)][1]=0.;//  exp( -w.x1[i]*w.x1[i]-w.x2[j]*w.x2[j]-w.x3[k]*w.x3[k] )*sin(2.2*w.x2[j]);;
+			}
 }
 
 void gaussianR0(field w,double x1,double x2,double x3)
