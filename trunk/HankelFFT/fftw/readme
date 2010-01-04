@@ -1,0 +1,2 @@
+These files are a set of tests about how to make a series of 1D transformation over a 2D array
+without copyng paste the result. The next improvement is to use the openmp directives.

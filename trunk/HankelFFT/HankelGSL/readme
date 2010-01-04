@@ -1,0 +1,25 @@
+The most important series of test about how to implement the Hankel transformations
+Also very important testings about how to make the matrx product using the slow index 
+(the j in the j*Nt+i) in the blas routines. These tests are very important 
+as the first index is used by the fftw routines and therefore that index is left for the 
+fftw.
+
+HankelGSLAccelerate.cpp is the main test of the routines and should be
+calibrated against the matlab scripts  Calibration/hankel_example
+
+In these matlab files, there is some explanation about the meaning of 
+the arrays f,F,F2,f2, Fretrieved and fretrieved. By running first the
+HankelGSLAccelerate.cpp and then the matlab files, some plots 
+showing coincident dots should appear.
+
+HankelGSL HankelAccelerate2.cpp and HankelAccelerateGaussian.cpp are further
+test of the Hankel routines.
+
+In all of these implementations, there are two arrays for each complex
+quantity and the products are made of two real matrix arrays. The file
+arrai.h provides the implementation of the basic arrays but as doubles.
+
+HankelGSLAccelerateRows.cpp shows how to implement the matrix product 
+in the second index, this is very important for the finel implementation.
+
+ 

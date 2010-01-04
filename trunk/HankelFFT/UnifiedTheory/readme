@@ -1,0 +1,14 @@
+These are the files where the test for the comple Hankel+FFT implementation is made.
+The first important thing is the creation of the fftw_complex arrai to make place
+for the fft in all arrays.
+
+Then the matrix multiplication is made with the the complex routine of the cblas and
+is made over the slow index to let space for the use of the 1D FFT transformation.
+
+The final versions are now into TestingHankelFourier1-5.cpp. The movies can be read with 
+the movie matlab script.
+
+There is one version of the TDSE which should be finished soon.
+
+The arrai.h file is made with complex fftw and therefore are ready to FFT
+

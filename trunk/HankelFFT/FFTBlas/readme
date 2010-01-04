@@ -1,0 +1,4 @@
+This is a series of test about using the fftw complex type together with the 
+cblas implementantaion of the framework Accelerate in mac os x (10.5)
+In the following times there should be the same but now for the intel compiler.
+
