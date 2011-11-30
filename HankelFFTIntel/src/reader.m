@@ -1,7 +1,7 @@
 A=importdata('out1.txt');
 
 B=reshape(A,1000,100);
-
+figure
 surf(B,'FaceColor','interp','EdgeColor','none')
  camlight left; lighting phong
  axis tight
