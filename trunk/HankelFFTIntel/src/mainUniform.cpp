@@ -17,7 +17,7 @@
 #include "constant.h"
 #include "arrai.h"
 #include "HankelMatrix.h"
-#include "wave.h"
+#include "waveUniform.h"
 
 
 int main()
@@ -34,34 +34,34 @@ int main()
 	
 	HankelMatrix HH(Nr,200.);
 	
-	wave wHank;
-	wHank.initialize(HH);
+	waveUniform w;
+	w.initialize(HH);
 	
-	printf("%d\n",wHank.Nr);
+	printf("%d\n",w.Nr);
 	
 	double r0=100.;
 	for(int i=0;i<HH.Nr;i++)
 	{
-		wHank.phiHank[i]=exp(-(HH.r[i]-r0)*(HH.r[i]-r0)/0.5/0.5);
+		w.phi[i]=exp(-(w.r[i]-r0)*(w.r[i]-r0)/0.5/0.5);
 	}
 	
-	printf("%e\n",wHank.norm());
-	wHank.normalize();
-	printf("%e\n",wHank.norm());
+	printf("%e\n",w.norm());
+	w.normalize();
+	printf("%e\n",w.norm());
 	
 	
 	double dt=0.005;
-	wHank.PrepareCrankArrays(dt);
-	for (int ktime=0; ktime<1000; ktime++)
+	w.PrepareCrankArrays(dt);
+	for (int ktime=0; ktime<10000; ktime++)
 	{
-		wHank.KineticPropCrankNonUniform(dt);
+		w.KineticPropCrankUniform(dt);
 		
 		if((ktime%100)==0)
 		{
 			for (int i=0; i<HH.Nr; i++)
-				fprintf(out1,"%10.17e \n", wHank.r[i]*abs(wHank.phiHank[i]) ); //Save wave function multiply by rho axis
+				fprintf(out1,"%10.17e \n", w.r[i]*abs(w.phi[i]) ); //Save wave function multiply by rho axis
 		}
-		printf("%e\n",1.-wHank.norm());
+		printf("%e\n",1.-w.norm());
 	}
 	
 	

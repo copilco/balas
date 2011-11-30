@@ -15,3 +15,10 @@ nonU: mainNonUniform.cpp
 	icpc mainNonUniform.cpp -L$(MKLROOT)/lib -I../include  -I$(MKLROOT)/include $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a -liomp5 -lpthread -lm
 	export DYLD_LIBRARY_PATH; \
 	./a.out
+
+uni: mainUniform.cpp
+	export MKLROOT; \
+	export DYLD_LIBRARY_PATH; \
+	icpc mainUniform.cpp -L$(MKLROOT)/lib -I../include  -I$(MKLROOT)/include $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a -liomp5 -lpthread -lm
+	export DYLD_LIBRARY_PATH; \
+	./a.out
