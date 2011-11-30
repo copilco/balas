@@ -8,3 +8,10 @@ test: mainTestWaveH.cpp
 	icpc mainTestWaveH.cpp -L$(MKLROOT)/lib -I../include  -I$(MKLROOT)/include $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a -liomp5 -lpthread -lm
 	export DYLD_LIBRARY_PATH; \
 	./a.out
+	
+nonU: mainNonUniform.cpp
+	export MKLROOT; \
+	export DYLD_LIBRARY_PATH; \
+	icpc mainNonUniform.cpp -L$(MKLROOT)/lib -I../include  -I$(MKLROOT)/include $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a -liomp5 -lpthread -lm
+	export DYLD_LIBRARY_PATH; \
+	./a.out

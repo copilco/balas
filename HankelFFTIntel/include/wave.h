@@ -7,6 +7,8 @@
  *
  */
 
+#include "tools.h"
+
 class wave
 {
 	
@@ -20,7 +22,8 @@ public:
 	complex *F2,*f2;
 	
 	complex *rv,*phil;
-	complex *a, *b, *c;
+	complex *a, *b, *c,*gam1;
+	
 	
 	/***********************************************************/	
 	//Fill the arrays and copy the grids in rho and k_rho
@@ -49,6 +52,7 @@ public:
 		a=     new complex[Nr];
 		b=     new complex[Nr];
 		c=     new complex[Nr];
+		gam1=     new complex[Nr];
 		
 		
 		/***********************************************************/	
@@ -81,50 +85,18 @@ public:
 		//Preparing the arrays fof the Crank
 		/***********************************************************/
 		
-		//Evaluating crank-nicholson formula	
-		double hh0 = 0.;
-		double dh0 = 0.;	
-		double hh  = 0.;
-		
 		
 		//Evaluation of diagonal up and diagonal down
-		for (int i=0; i< Nr-1; i++) {
-			
-			hh  = dr[i+1] + dr[i];
-			dh0 = dr[i+1] - dr[i];		
-			hh0 = dr[i+1]*dr[i+1] + dr[i]*dr[i];
-			
-			a[i]     =  ( complex( 0., - 1./hh0  ) +
-						  complex( 0., - 1.*dh0/hh/hh0  ) +
-						  complex( 0., + 1./2./hh/r[i]  ) 
-						 )*dt/2.;
-			
-			c[i]     =  ( complex( 0., - 1./hh0  ) +
-						  complex( 0., + 1.*dh0/hh/hh0  ) +
-						  complex( 0., - 1./2./hh/r[i]  )
-						 )*dt/2. ;
-			
-			b[i] =  complex( 1.0, 0.)+ complex( 0.0, 2./hh0  + v[i] )*dt/2.;
-			
+		for (int i=0; i< Nr; i++)
+		{
+			a[i]=complex(0.,0.);
+			c[i]=complex(0.,0.);			
+			b[i]=complex(0.,0.);	
+			rv[i]=complex(0.,0.);
+			phil[i]=complex(0.,0.);
+			gam1[i]=complex(0.,0.);
 		}
-		
-		int nend=Nr-1;
-		hh  = dr[nend] + dr[nend];
-		dh0 = dr[nend] - dr[nend];		
-		hh0 = dr[nend]*dr[nend] + dr[nend]*dr[nend];
-		
-		a[nend]     =  ( complex( 0., - 1./hh0  ) +
-						 complex( 0., - 1.*dh0/hh/hh0  ) +
-						 complex( 0., + 1./2./hh/r[nend]  ) 
-						)*dt/2.;
-		
-		c[nend]     =  ( complex( 0., - 1./hh0  ) +
-						 complex( 0., + 1.*dh0/hh/hh0  ) +
-						 complex( 0., - 1./2./hh/r[nend]  )
-						)*dt/2. ;
-		
-		b[nend] =  complex( 1.0, 0.)+complex( 0.0, 2./hh0  + v[nend] )*dt/2.;
-		
+				
 		
 		
 	}
@@ -231,7 +203,8 @@ public:
 		
 		
 		//Evaluation of diagonal up and diagonal down
-		for (int i=0; i< Nr-1; i++) {
+		for (int i=0; i< Nr-1; i++) 
+		{
 			
 			hh  = dr[i+1] + dr[i];
 			dh0 = dr[i+1] - dr[i];		
@@ -249,7 +222,6 @@ public:
 			
 			b[i] =  complex( 1.0, 0.)+ complex( 0.0, 2./hh0 )*dt/2.;
 			//b[i] =  complex( 1.0, 0.)+ complex( 0.0, 2./hh0  + v[i] )*dt/2.;
-			
 		}
 		
 		int nend=Nr-1;
@@ -270,6 +242,27 @@ public:
 		b[nend] =  complex( 1.0, 0.)+complex( 0.0, 2./hh0   )*dt/2.;
 		//b[nend] =  complex( 1.0, 0.)+complex( 0.0, 2./hh0  + v[nend] )*dt/2.;
 	}
+	
+	void KineticPropCrankNonUniform(double dt)
+	{
+		//Starting Right
+		rv[0] =   conj(a[0])*phiHank[1]+conj(b[0])*phiHank[0]+conj( c[0] )*phiHank[1];	
+		
+		for (int i=1; i<Nr-1; i++) 	
+			rv[i] = conj(a[i])*phiHank[i-1]+conj( b[i] )*phiHank[i]+conj(c[i])*phiHank[i+1];
+
+		//Finishing right
+		complex zero=complex(0.,0.);
+		rv[Nr-1] = conj(a[Nr-1])*phiHank[Nr-2]+conj(b[Nr-1])*phiHank[Nr-1]+conj(c[Nr-1])*phiHank[Nr-2]*zero;
 		
 		
-	};
+		
+		//Solving Triagonal Matrix
+		tridag(a,b,c,rv,phil,Nr,gam1);
+		
+		for(int i=0;i<Nr;i++)
+			phiHank[i]=phil[i];
+	}
+		
+		
+};
