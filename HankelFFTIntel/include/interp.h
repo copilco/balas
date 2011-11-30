@@ -28,10 +28,10 @@ void interpH2U(wave wHank, waveUniform wU)
 	// Create the interpolant //
 	////////////////////////////
 	
-	s[1] =complex(-0.5,-0.5);
-	u[1]=(3.0/(wHank.r[2]-wHank.r[1]))*((wHank.phiHank[2]-wHank.phiHank[1])/(wHank.r[2]-wHank.r[1]));
+	s[0] =complex(-0.5,-0.5);
+	u[0]=(3.0/(wHank.r[1]-wHank.r[0]))*((wHank.phiHank[1]-wHank.phiHank[0])/(wHank.r[1]-wHank.r[0]));
 	
-	for (int i=2;i<=wHank.Nr-1;i++)
+	for (int i=1;i<=wHank.Nr-2;i++)
 	{	
 		sig=(wHank.r[i]-wHank.r[i-1])/(wHank.r[i+1]-wHank.r[i-1]);
 		p=sig*s[i-1]+2.0;
@@ -41,11 +41,11 @@ void interpH2U(wave wHank, waveUniform wU)
 	}
 	
 	qn=complex(0.5,0.5);
-	un=(3.0/(wHank.r[wHank.Nr]-wHank.r[wHank.Nr-1]))*(-(wHank.phiHank[wHank.Nr]-wHank.phiHank[wHank.Nr-1])/(wHank.r[wHank.Nr]-wHank.r[wHank.Nr-1]));
+	un=(3.0/(wHank.r[wHank.Nr-1]-wHank.r[wHank.Nr-2]))*(-(wHank.phiHank[wHank.Nr-1]-wHank.phiHank[wHank.Nr-2])/(wHank.r[wHank.Nr-1]-wHank.r[wHank.Nr-2]));
 	
-	s[wHank.Nr]=(un-qn*u[wHank.Nr-1])/(qn*s[wHank.Nr-1]+1.0);
+	s[wHank.Nr-1]=(un-qn*u[wHank.Nr-2])/(qn*s[wHank.Nr-2]+1.0);
 	
-	for (int k=wHank.Nr-1;k>=1;k--)	
+	for (int k=wHank.Nr-2;k>=0;k--)	
 	{
 		s[k]=s[k]*s[k+1]+u[k];
 	}
