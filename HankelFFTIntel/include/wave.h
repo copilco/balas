@@ -7,6 +7,9 @@
  *
  */
 
+#ifndef WAVE_H
+#define WAVE_H
+
 #include "tools.h"
 
 class wave
@@ -266,3 +269,5 @@ public:
 		
 		
 };
+
+#endif // TOOLS_H

@@ -7,6 +7,9 @@
  *
  */
 
+#ifndef WAVEUNIFORM_H
+#define WAVEUNIFORM_H
+
 #include "tools.h"
 
 class waveUniform
@@ -146,3 +149,4 @@ public:
 		
 		
 };
+#endif // TOOLS_H
