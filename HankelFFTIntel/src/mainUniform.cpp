@@ -24,7 +24,7 @@ int main()
 {
 	
 	FILE *out1;
-	out1=fopen("out1.txt","w");
+	out1=fopen("out1Uniform.txt","w");
 	
 	// Parameters!!
 	
@@ -52,11 +52,11 @@ int main()
 	
 	double dt=0.005;
 	w.PrepareCrankArrays(dt);
-	for (int ktime=0; ktime<10000; ktime++)
+	for (int ktime=0; ktime<1000; ktime++)
 	{
 		w.KineticPropCrankUniform(dt);
 		
-		if((ktime%100)==0)
+		if((ktime%10)==0)
 		{
 			for (int i=0; i<HH.Nr; i++)
 				fprintf(out1,"%10.17e \n", w.r[i]*abs(w.phi[i]) ); //Save wave function multiply by rho axis
