@@ -34,7 +34,7 @@ ymin =-15;
 ymax = 15;
 for j=1:Nsnap
     %clf
-    hold off
+    figure
     PHI=reshape(A1(1+nr*nz*(j-1):nr*nz*j),nz,nr);
     
 %for jmovie=1:3
