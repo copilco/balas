@@ -99,7 +99,7 @@ void trid_simple( complex a, complex *b, complex c, complex *r, complex *u,compl
 }
 
 
-void tridagAlexis( vector<complex> &a, vector<complex> &b, vector<complex> &c, vector<complex> &r, vector<complex> &u, vector<complex> &gamr,int n)
+void tridagAlexis( complex *a, complex *b, complex *c, complex *r, complex *u, complex *gamr,int n)
 {
 	int j;
 //	gam1.resize( n, 0. );
