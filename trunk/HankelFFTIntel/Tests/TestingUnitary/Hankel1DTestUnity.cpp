@@ -122,7 +122,7 @@ int main()
 			norm+=HH.dv[i]*HH.v[i]*real(conj(f2.v[i])*f2.v[i]);
 		}
 		
-		printf("Norm frequency space =%e ",norm);
+		printf("Norm frequency space =%e ",1.-norm);
 		
 		for(int i=0;i<Nr;i++)
 		{
