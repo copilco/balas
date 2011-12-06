@@ -3,7 +3,7 @@
  *  
  *
  *  Created by camilo on 30/11/11.
- *  Copyright 2011 __MyCompanyName__. All rights reserved.
+ *  
  *
  */
 
@@ -50,6 +50,7 @@ void interpH2U(wave wHank, waveUniform wU)
 		s[k]=s[k]*s[k+1]+u[k];
 	}
 	
+	/*
 	////////////////////////////
 	// Evaluate the polynom   //
 	////////////////////////////
@@ -75,6 +76,83 @@ void interpH2U(wave wHank, waveUniform wU)
 		b=(wU.r[i]-wHank.r[klo])/h;
 		wU.phi[i]=a*wHank.phiHank[klo]+b*wHank.phiHank[khi]+((a*a*a-a)*s[klo]+(b*b*b-b)*s[khi])*(h*h)/6.0;
 		
+	}
+	*/
+	int jm,jhi,inc;
+	int jlo;
+	int ascnd;
+	
+	
+	for(int i=0;i<wU.Nr;i++)
+	{
+		
+		ascnd=(wHank.r[wHank.Nr-1] >= wHank.r[0]);
+		if (jlo < 0 || jlo > wHank.Nr)
+		{
+			jlo=0;
+			jhi=wHank.Nr;
+		}
+		else {
+			
+			inc=1;
+			if (wU.r[i] >= wHank.r[jlo] == ascnd)
+			{
+				if (jlo == wHank.Nr-1) return; 
+				jhi=(jlo)+1;
+				while (wU.r[i] >= wHank.r[jhi] == ascnd)
+				{
+					jlo=jhi;
+					inc += inc;
+					jhi=(jlo)+inc;
+					
+					if (jhi > wHank.Nr-1) 
+					{
+						jhi=wHank.Nr; 
+						break;
+					}
+				}
+			}
+			else
+			{
+				if (jlo == 1)
+				{ 
+					jlo=0;
+					return;
+				}
+				
+				jhi=(jlo)--;
+				while (wU.r[i] < wHank.r[jlo] == ascnd) 
+				{	jhi=(jlo);
+					inc <<= 1;
+					if (inc >= jhi)
+					{ 
+						jlo=0;
+						break;
+					}
+					else jlo=jhi-inc;
+				}
+			}
+		}
+		while (jhi-(jlo) != 1)
+		{
+			jm=(jhi+(jlo)) >> 1;
+			if (wU.r[i] >= wHank.r[jm] == ascnd)
+				jlo=jm; else
+					jhi=jm;
+		}
+		
+		if (wU.r[i] == wHank.r[wHank.Nr-1]) jlo=wHank.Nr-2;
+		if (wU.r[i] == wHank.r[1]) jlo=1;
+		
+		
+		
+		h=wHank.r[jlo]-wHank.r[jhi];
+		if (h == 0.0) 
+			nrerror ("Bad x array input");
+		
+		a=(wHank.r[jhi]-wU.r[i])/h;
+		b=(wU.r[i]-wHank.r[jlo])/h;
+		wU.phi[i]=a*wHank.phiHank[jlo]+b*wHank.phiHank[jhi]+((a*a*a-a)*s[jlo]+(b*b*b-b)*s[jhi])*(h*h)/6.0;
 	}
 	
 	
@@ -123,6 +201,8 @@ void interpU2H(waveUniform &wU, wave &wHank)
 		s[k]=s[k]*s[k+1]+u[k];
 	}
 	
+	
+	/*
 	////////////////////////////
 	// Evaluate the polynom   //
 	////////////////////////////
@@ -149,6 +229,85 @@ void interpU2H(waveUniform &wU, wave &wHank)
 		wHank.phiHank[i]=a*wU.phi[klo]+b*wU.phi[khi]+((a*a*a-a)*s[klo]+(b*b*b-b)*s[khi])*(h*h)/6.0;
 		
 	}
+	*/
+	
+	int jm,jhi,inc;
+	int jlo;
+	int ascnd;
+	
+	for(int i=0;i<wHank.Nr;i++)
+	{
+		ascnd=(wU.r[wU.Nr-1] >= wU.r[0]);
+		if (jlo < 0 || jlo > wU.Nr)
+		{
+			jlo=0;
+			jhi=wU.Nr;
+		}
+		else {
+			
+			inc=1;
+			if (wHank.r[i] >= wU.r[jlo] == ascnd)
+			{
+				if (jlo == wU.Nr-1) return; 
+				jhi=(jlo)+1;
+				while (wHank.r[i] >= wU.r[jhi] == ascnd)
+				{
+					jlo=jhi;
+					inc += inc;
+					jhi=(jlo)+inc;
+					
+					if (jhi > wU.Nr-1) 
+					{
+						jhi=wU.Nr; 
+						break;
+					}
+				}
+			}
+			else
+		{
+			if (jlo == 1)
+			{ 
+				jlo=0;
+				return;
+			}
+			
+			jhi=(jlo)--;
+			while (wHank.r[i] < wU.r[jlo] == ascnd) 
+			{	jhi=(jlo);
+				inc <<= 1;
+				if (inc >= jhi)
+				{ 
+					jlo=0;
+					break;
+				}
+				else jlo=jhi-inc;
+			}
+		}
+		}
+		while (jhi-(jlo) != 1)
+		{
+			jm=(jhi+(jlo)) >> 1;
+			if (wHank.r[i] >= wU.r[jm] == ascnd)
+				jlo=jm; else
+					jhi=jm;
+		}
+		
+		if (wHank.r[i] == wU.r[wU.Nr-1]) jlo=wU.Nr-2;
+		if (wHank.r[i] == wU.r[1]) jlo=1;
+		
+		
+		
+		h=wHank.r[jlo]-wHank.r[jhi];
+		if (h == 0.0) 
+			nrerror ("Bad x array input");
+		
+		a=(wU.r[jhi]-wHank.r[i])/h;
+		b=(wHank.r[i]-wU.r[jlo])/h;
+		wHank.phiHank[i]=a*wU.phi[jlo]+b*wU.phi[jhi]+((a*a*a-a)*s[jlo]+(b*b*b-b)*s[jhi])*(h*h)/6.0;
+		
+	}
+	
+	
 	
 	
 	delete[] s;

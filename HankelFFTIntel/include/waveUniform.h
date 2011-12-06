@@ -35,7 +35,7 @@ public:
 	{
 		Nr=HH.Nr;
 		R=HH.R;
-		dr=R/(Nr-1);
+		dr=R/Nr;
 		
 		phi=new complex[Nr];		
 

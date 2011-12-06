@@ -22,7 +22,7 @@ int main()
 {
 	// Parameters!!
 		
-	int Nr=3000;
+	int Nr=1000;
 	int Nt=1;
 	
 	
@@ -93,8 +93,8 @@ int main()
 	
 	
 	
-	int Ng=500;
-	double dt=0.01;
+	int Ng=1000;
+	double dt=0.005;
 	int Nsnap=20;
     
 	// Add the phase
@@ -157,7 +157,7 @@ int main()
 			norm+=HH.dv[i]*HH.v[i]*real(conj(fp2.v[i])*fp2.v[i]);
 		}
 		
-		//printf("Norm frequency space (after phase) =%e\n",norm);
+		printf("Norm frequency space (after phase) =%e\n",1.-norm);
 		
 		// Backwards
 		
@@ -172,13 +172,14 @@ int main()
 		}
 		
         
-        if (gg%(Ng/(Nsnap-1))==0 )
+		if((gg%10)==0)
 		{
+			
             for(int i=0;i<Nr;i++)
             {
                 fprintf(outPhiRetrieved,"%12.5e\n",HH.r[i]*abs(phi.v[i]));
             }
-			fprintf(timefile,"%e\n",gg*dt);
+			//fprintf(timefile,"%e\n",gg*dt);
 		}
 		
 		norm=0.;
@@ -192,7 +193,7 @@ int main()
 		
 		
 	}
-	 
+	
 	
 	for(int i=0;i<Nr;i++)
 		fprintf(rhofile,"%12.5e\n",HH.r[i] );

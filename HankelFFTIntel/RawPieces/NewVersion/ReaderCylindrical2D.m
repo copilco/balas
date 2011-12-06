@@ -24,19 +24,21 @@ r0=12;
 
 
 %% 
-aviobj = avifile('GEWP_C2D.avi');
+%aviobj = avifile('GEWP_C2D.avi');
 scrsz = get(0,'ScreenSize');
-fig=figure('Position',[1 scrsz(4) scrsz(3)*0.7 scrsz(4)*0.7],...
+fig=figure('Position',[1 scrsz(4) scrsz(3)*0.5 scrsz(4)*0.5],...
     'Color','w');
 xmin = 0;
 xmax = 24;
 ymin =-15;
 ymax = 15;
 for j=1:Nsnap
-    clf
+    %clf
+    hold off
     PHI=reshape(A1(1+nr*nz*(j-1):nr*nz*j),nz,nr);
     
-for jmovie=1:3
+%for jmovie=1:3
+   % subplot(5,3,j)
     surfc(R,Z,log10(PHI+1e-12),...
         'FaceColor','interp',...
         'EdgeColor','none')
@@ -64,13 +66,14 @@ for jmovie=1:3
     h=gca;    
     set(h,'fontsize',16)
     
-    F = getframe(fig);
-    aviobj = addframe(aviobj,F); 
-end 
+    caxis([-6 -1])
+  %  F = getframe(fig);
+  %  aviobj = addframe(aviobj,F); 
+%end 
     pause(0.1)
-    display(j);
+ %   display(j);
 end    
     
-aviobj = close(aviobj);
+%aviobj = close(aviobj);
 
 %%
