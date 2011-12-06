@@ -320,7 +320,73 @@ public:
 		}	
 	}
 	
+
+	//**********************************
+	//==================================//
+	//RHO_Operator dt	Complete Version 
+	
+	void Rprop( complex dt )
+	{	
 		
+		complex a1 = complex(1.,0.);
+		complex a2 = complex(0.,0.);	
+		
+		
+		//**********************************
+		//**********************************
+		//==================================//
+		//RHO_Operator dt	
+		for ( int j=0; j<Nz; j++ )
+		{
+			
+			//Left part Rho
+			for( int i=0; i<Nr; i++ )
+			{						
+				ar[i]     =   (complex( 0., - 1./4./dr/dr  ) +
+							   complex( 0., + 1./8./dr/r[i]  ))*dt;
+				
+				a2		  =   complex(0., 1./2./dr/dr  + v[index(i,j)]/4.)*dt ;
+				br[i]	  =   a1 + a2;
+				
+				cr[i]     =   (complex( 0., - 1./4./dr/dr  ) +
+							   complex( 0., - 1./8./dr/r[i]  ))*dt;
+			}//End left part
+			
+			
+			
+			//Right part Rho 
+			//complex phi0 = phi[index(1,j)];//complex(0.,0.);//
+			
+			rv_r[0]		 =	conj( ar[0]  )*phi[index(1,j)] +
+			                conj( br[0]  )*phi[index(0,j)] + 
+			                conj( cr[0]  )*phi[index(1,j)];			
+			
+			for (int i=1; i<Nr-1; i++) 
+				rv_r[i]	=	conj( ar[i]  )*phi[index(i-1,j)] + 
+				            conj( br[i]  )*phi[index(i,j)]   + 
+				            conj( cr[i]  )*phi[index(i+1,j)];
+			
+			rv_r[Nr-1]	 =	conj( ar[Nr-1]  )*phi[index(Nr-2,j)]  +
+			                conj( br[Nr-1]  )*phi[index(Nr-1,j)];
+			//Finishing right
+			
+			
+			
+			//Zeros
+			//zeros(phi_r);
+			
+			
+			//Solving Triagonal Matrix			
+			tridagAlexis(ar, br, cr, rv_r, phi_r,gamr, Nr);
+			
+			
+			for (int i=0; i<Nr; i++)
+				phi[index(i,j)] =	phi_r[i];//phi[index(i,j,nz)];
+		}
+	}
+
+	//******************************************// End Rho_propagator
+	//==========================================//
 		
 		
 	/*
