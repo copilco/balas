@@ -144,7 +144,7 @@ public:
 	{
 		double norm=0.0;
 		for(int j=0;j<Nr;j++)
-			for(int i=0;i<Nr;i++)
+			for(int i=0;i<Nz;i++)
 				norm+=dz*dr*r[j]*real(conj(phi[index(j,i)])*phi[index(j,i)]);
 		
 		return norm;
