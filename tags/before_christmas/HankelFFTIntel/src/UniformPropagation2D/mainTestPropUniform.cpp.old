@@ -1,0 +1,168 @@
+/*
+ *  mainTestWaveH.cpp
+ *  
+ *
+ *  Created by camilo on 29/11/11.
+ *  Copyright 2011 __MyCompanyName__. All rights reserved.
+ *
+ */
+
+
+#include <iostream>
+#include <math.h>
+#include <complex>
+#define MKL_Complex16 std::complex<double>
+#include "mkl.h"
+#include "mkl_dfti.h"
+#include "constant.h"
+#include "arrai.h"
+#include "HankelMatrix.h"
+#include "waveUniform2D.h"
+#include "tools.h"
+
+
+int main()
+{
+	
+	FILE *out2,*out0;
+
+	out2 = fopen("out2.txt","w");
+	out0 = fopen("out0.txt","w");
+	// Parameters!!
+	
+	int Nr=100;
+	int Nz=200;
+	
+	HankelMatrix HH(Nr,20.);
+	
+	waveUniform2D w;
+	w.initialize(HH,Nz,0.1);
+	printf("\n Nr=%d\n",w.Nr);
+	printf("   Nz=%d\n",w.Nz);
+	
+	for(int j=0; j<w.Nr; j++)
+		fprintf(out0,"%e \n",w.r[j]);
+	
+	for (int i=0; i<w.Nz; i++)
+		fprintf(out0,"%e \n",w.z[i]);		
+	
+	double r0=10.;
+	double sigmar=.7;
+	for(int j=0;j<HH.Nr;j++)
+		for(int i=0;i<Nz;i++)
+		{
+			w.phi[w.index(j,i)]=exp(-(w.r[j]-r0)*(w.r[j]-r0)/sigmar/sigmar-(w.z[i]*w.z[i]));
+			//w.v[w.index(j,i)]=-exp(-(w.r[j]-r0)*(w.r[j]-r0)/sigmar/sigmar-(w.z[i]*w.z[i]));
+		}
+
+	printf("%e\n",w.norm());
+	w.normalize();
+	printf("%e\n",w.norm());
+	
+	/*
+	for(int j=0;j<w.Nr;j++)
+		for(int i=0;i<w.Nz;i++)
+		{
+			fprintf(out1,"%10.17e \n", abs(w.phi[w.index(j,i)]) ); //Save wave function multiply by rho axis
+		}
+*/	
+	
+
+	
+	
+	
+	complex dt=complex(0.01,0.);
+	//double dt=0.01;
+	//w.PrepareCrankArrays(dt);
+	
+	complex a2;
+	
+	for (int ktime=0; ktime<1200; ktime++)
+	{
+		w.Zprop1(dt);
+		
+		/*
+		w.az = complex( 0., -1./w.dz/w.dz/4. )*dt;
+		w.cz = complex( 0., -1./w.dz/w.dz/4. )*dt;
+		
+		//*******************************
+		//===============================//
+		//Z_operator 1/2*dt
+		for (int j=w.Nr/2; j<w.Nr/2+1; j++ )
+		{
+			
+			//Left part Z
+			for(int i=0; i<w.Nz; i++)	
+			{
+				a2= complex(0.,1./2./w.dz/w.dz  + 0.*w.v[w.index(j,i)]/4.) ;
+				w.bz[i]	=	complex(1.,0.) +complex(0.,dt/2./w.dz/w.dz);//  a2*dt;
+			}
+			
+			
+			//Right part Z
+			w.rv_z[0]		=   conj(w.bz[0])*w.phi[w.index(j,0)]   + 
+			                    conj( w.cz  )*w.phi[w.index(j,1)];	
+			
+			
+			for (int i=1; i<(w.Nz-1); i++) 
+				w.rv_z[i] =	conj( w.az    )*w.phi[w.index(j,i-1)] + 
+				            conj( w.bz[i] )*w.phi[w.index(j,i)]   + 
+				            conj( w.cz    )*w.phi[w.index(j,i+1)];
+			
+			
+			w.rv_z[w.Nz-1]	=	conj( w.az  )*w.phi[w.index(j,w.Nz-2)]  +
+			                    conj( w.bz[w.Nz-1]  )*w.phi[w.index(j,w.Nz-1)];	
+			//Finishing right part Z
+			
+			//Zeros on Z
+			//zeros(phi_z);		
+			//for(int i=0;i<Nz;i++)
+			//	phi_z[i]=complex(0.,0.);
+			
+			
+			//Solving Triagonal Matrix	for Z
+			//trid_simple(az,bz,cz,rv_z,phi_z,gamz,Nz);
+			tridagS(w.az,w.bz,w.cz,w.rv_z,w.phi_z, w.Nz,w.gamz);
+			
+			//Save function 
+			for (int i=0; i<w.Nz; i++)
+				w.phi[j*Nz+i] =w.phi_z[i];		//psi0[index(i,j,nz)] = psi0[index(i,j,nz)];//
+		}	
+
+		*/
+		
+		
+	
+		
+		
+		
+		/*
+		if(ktime==41)
+		{
+			for(int i=0;i<w.Nz;i++)
+				printf("%e %e\n",real(w.phi_z[i]),real(w.phi_z[i])  );
+		}
+		
+		*/
+			
+		if((ktime%100)==0)
+		{
+			
+			for(int j=0;j<HH.Nr*Nz;j++)
+				fprintf(out2,"%e \n", abs(w.phi[j])); //Save wave function multiply by rho axis
+			
+		}
+		 
+		//fprintf(out1,"%e \n", real(w.phi[1]));
+		printf("%d %e\n",ktime,1.-w.norm());
+	}
+	 
+
+	for(int l=0;l<Nr*Nz;l++)
+		fprintf(out2,"%e\n",abs(w.phi[l]) );
+	
+	
+	
+	
+	
+}
