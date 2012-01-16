@@ -416,6 +416,82 @@ public:
 	}
 	 */
 		
+	
+	void absorber(const double &frac_r_left,const double &frac_z_left,const double &frac_r_right,const double &frac_z_right,const double &exponent)
+	{
+		
+		// Try 1./6. in the exponent.
+		
+		double mask_start_z_right=z[int(Nz*(1.-frac_z_right))];
+		double mask_start_r_right=r[int(Nr*(1.-frac_r_right))];
+		
+		double mask_start_z_left=z[int(Nz*frac_z_left)+1];
+		double mask_start_r_left=r[int(Nr*frac_r_left)+1];
+		
+		
+		double argument_z_right;
+		double argument_r_right;
+		
+		
+		double argument_z_left;
+		double argument_r_left;	
+		
+		
+		double mask_z_right;
+		double mask_r_right;
+		
+		double mask_z_left;
+		double mask_r_left;
+		
+		
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+			{
+				argument_z_right=(pi/2.)*(z[i]-mask_start_z_right)/(z[Nz-1]-mask_start_z_right+1.e-20);
+				argument_r_right=(pi/2.)*(r[j]-mask_start_r_right)/(r[Nr-1]-mask_start_r_right+1.e-20);
+				
+				
+				argument_z_left=(pi/2.)*(z[i]-mask_start_z_left)/(z[0]-mask_start_z_left+1.e-20);
+				argument_r_left=(pi/2.)*(r[j]-mask_start_r_left)/(r[0]-mask_start_r_left+1.e-20);
+				
+				
+				mask_z_right=pow(fabs(cos(argument_z_right)),exponent);
+				mask_r_right=pow(fabs(cos(argument_r_right)),exponent);
+				
+				
+				mask_z_left=pow(fabs(cos(argument_z_left)),exponent);
+				mask_r_left=pow(fabs(cos(argument_r_left)),exponent);
+				
+				
+				
+				if (i< int(Nz*frac_z_left))
+				{		  
+					phi[index(j,i)].real()*=mask_z_left;	
+					phi[index(j,i)].imag()*=mask_z_left;	
+				}
+				
+				if (i> int(Nz*(1.-frac_z_right)))
+				{		  
+					phi[index(j,i)].real()*=mask_z_right;	
+					phi[index(j,i)].imag()*=mask_z_right;	
+				}
+				
+				if (j< int(Nr*frac_r_left))
+				{		  
+					phi[index(j,i)].real()*=mask_r_left;	
+					phi[index(j,i)].imag()*=mask_r_left;	
+				}
+				
+				if (j> int(Nr*(1.-frac_r_right)))
+				{		  
+					phi[index(j,i)].real()*=mask_r_left;	
+					phi[index(j,i)].imag()*=mask_r_left;	
+				}
+				
+			}//End the loop on ij
+	}
+	
 		
 };
 #endif // TOOLS_H

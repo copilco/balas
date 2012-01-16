@@ -119,19 +119,6 @@ public:
 			
 		}
 		
-		/**************************************************/
-		//Exporting to a bin file the values of the Hankel axis
-		
-		fstream raxis ("HankelRhoaxis.bin", ios::out | ios::binary);
-		raxis.write ((char*)&r[0], sizeof (double)*(Nr) );
-		raxis.close();
-		
-		fstream vaxis ("HankelVaxis.bin", ios::out | ios::binary);
-		vaxis.write ((char*)&v[0], sizeof (double)*(Nr) );
-		vaxis.close();
-		
-		/**************************************************/
-		
 		
         dr=(double*)mkl_malloc(Nr*sizeof(double),16);
         dv=(double*)mkl_malloc(Nr*sizeof(double),16);
@@ -169,16 +156,7 @@ public:
 			}
 		}
 		
-		
-		/**************************************************/
-		//Exporting to a bin file the values of the Hankel matrix.
-
-		fstream beselMat ("BesselMatrix.bin", ios::out | ios::binary);
-		beselMat.write ((char*)&Creal[0], sizeof (double)*(Nr*Nr) );
-		beselMat.close();
-		
-		/**************************************************/
-		
+	
 		
 		m1=(double*)mkl_malloc(1*Nr*sizeof(double),16);
 		m2=(double*)mkl_malloc(1*Nr*sizeof(double),16);
@@ -189,20 +167,6 @@ public:
 			m1[i]=fabs(j1(c[i]))/R;
 			m2[i]=fabs(j1(c[i]))/V;
 		}
-		
-		
-		/**************************************************/
-		//Exporting to a bin file the values of the Hankel axis
-		
-		fstream m1file ("Hankelm1.bin", ios::out | ios::binary);
-		m1file.write ((char*)&m1[0], sizeof (double)*(Nr) );
-		m1file.close();
-		
-		fstream m2file ("Hankelm2.bin", ios::out | ios::binary);
-		m2file.write ((char*)&m2[0], sizeof (double)*(Nr) );
-		m2file.close();
-		
-		/**************************************************/
 		
 		
 	}
@@ -220,6 +184,54 @@ public:
 		mkl_free(m2);
 		mkl_free(dr);
 		mkl_free(dv);
+		
+	}
+	
+	
+	void getAxisBin()
+	{
+		
+		//////////////////////////////////////////////////////////
+		//Exporting to a bin file the values of the Hankel axis
+		//////////////////////////////////////////////////////////
+		
+		
+		fstream raxis ("HankelRhoaxis.bin", ios::out | ios::binary);
+		raxis.write ((char*)&r[0], sizeof (double)*(Nr) );
+		raxis.close();
+		
+		fstream vaxis ("HankelVaxis.bin", ios::out | ios::binary);
+		vaxis.write ((char*)&v[0], sizeof (double)*(Nr) );
+		vaxis.close();
+		
+		
+		
+	}
+	
+	void getHankelMatrixBin()
+	{
+		//////////////////////////////////////////////////////////
+		//Exporting to a bin file the values of the Hankel matrix.
+		//////////////////////////////////////////////////////////
+		
+		fstream beselMat ("BesselMatrix.bin", ios::out | ios::binary);
+		beselMat.write ((char*)&Creal[0], sizeof (double)*(Nr*Nr) );
+		beselMat.close();
+		
+		
+		//////////////////////////////////////////////////////////
+		//Exporting to a bin file the values of the Hankel axis
+		//////////////////////////////////////////////////////////
+		
+		
+		fstream m1file ("Hankelm1.bin", ios::out | ios::binary);
+		m1file.write ((char*)&m1[0], sizeof (double)*(Nr) );
+		m1file.close();
+		
+		fstream m2file ("Hankelm2.bin", ios::out | ios::binary);
+		m2file.write ((char*)&m2[0], sizeof (double)*(Nr) );
+		m2file.close();
+		
 		
 	}
 	
