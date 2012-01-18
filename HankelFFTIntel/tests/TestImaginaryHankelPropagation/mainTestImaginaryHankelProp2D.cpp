@@ -34,25 +34,25 @@ int main()
     //  Parameters  //
     //////////////////
     
-    int Nr=520;
-    int Nz=680;
+    int Nr=100;//520;
+    int Nz=200;
     
-    double dz=0.1;
-    double dr=0.1;
-	double absdt=0.01;
+    double dz=0.3;
+    double dr=0.3;
+	double absdt=0.1;
     
     double *v = new double[Nr*Nz];
     double echarge=-1.;
     double soft_core=2.;
     
-    int Ntime=1000;
+    int Ntime=400;
     int snap=20;
     
     //Gaussian parameters
     
 	double Rmax  = ceil(Nr*dr);
     double rho0  = Rmax/2.;
-	double rho00 = 12.;
+	double rho00 = 0.;//12.;
 	double z0    = 0.;		
 	double v0r   = 0.;//5.;
 	double v0z   = 0.0;	
@@ -94,10 +94,10 @@ int main()
 		for (int i=0; i<Nz; i++)
         {
 			//w.phi[w.index(i,j)]=exp(-(w.r[j]-rho0)*(w.r[j]-rho0)/sigma/sigma-(w.z[i]*w.z[i])/sigma/sigma);
-			w.phi[w.index(j,i)]= w.r[j]*exp(  -(w.r[j] - rho0)*(w.r[j] - rho0)/sigma/sigma -(w.z[i] - z0)*(w.z[i] - z0)/sigma/sigma )*exp(I* (v0r*(w.r[j] - rho0) + v0z*(w.z[i] - z0))  );
+			w.phi[w.index(j,i)]= w.r[j]*exp(  -(w.r[j] - rho0)*(w.r[j] - rho0)/sigma/sigma -(w.z[i] - z0)*(w.z[i] - z0)/sigma/sigma );//*exp(I* (v0r*(w.r[j] - rho0) + v0z*(w.z[i] - z0))  );
 			
             //Set potential
-            v[w.index(j,i)]=echarge/sqrt(soft_core+(w.r[j]-rho0)*(w.r[j]-rho0)+(w.z[i]-z0)*(w.z[i]-z0));
+            v[w.index(j,i)]=-4./sqrt(soft_core+(w.r[j])*(w.r[j])+(w.z[i])*(w.z[i]));
 		}
     
     
@@ -141,10 +141,10 @@ int main()
         //  Evolve   //
         ///////////////
         
-        
+		w.FFTFor();        
         w.phi2F(HH);
         w.HankelTransform(HH);
-		w.FFTFor();
+
 		
 		fase=complex(0.,0.);
 		
@@ -155,10 +155,10 @@ int main()
 				w.G[w.index(j,i)]*=exp(-I*fase);
 			}
         
-        w.FFTBack();
+
         w.HankelTransformBack(HH);
         w.F2phi(HH);
-        
+        w.FFTBack();        
         
         
         
@@ -179,10 +179,10 @@ int main()
         /////////////////////////////////////////////////////////////////////////////////
         
         
-        
+        w.FFTFor();
         w.phi2F(HH);
         w.HankelTransform(HH);
-		w.FFTFor();
+		
 		
 		fase=complex(0.,0.);
 		
@@ -193,10 +193,10 @@ int main()
 				w.G[w.index(j,i)]*=exp(-I*fase);
 			}
         
-        w.FFTBack();
+
         w.HankelTransformBack(HH);
         w.F2phi(HH);
-
+        w.FFTBack();
 		
 		cout << "Norm: " <<  w.norm() << endl;
 		
