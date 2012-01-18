@@ -1,6 +1,6 @@
 MKLROOT=/opt/intel/mkl
-COMPOSERLIB=/opt/intel/composer_xe_2011_sp1.8.269/
-DYLD_LIBRARY_PATH=/opt/intel/composer_xe_2011_sp1.8.269/compiler/lib
+COMPOSERLIB=/opt/intel/composerxe-2011.5.209/
+DYLD_LIBRARY_PATH=/opt/intel/composerxe-2011.5.209/compiler/lib
 MKL_NUM_THREADS=8
 
 
