@@ -48,6 +48,7 @@ public:
 	double *r;
 	double *v;
 	complex *C;
+	double *Creal;
 	double *m1;
 	double *m2;
     
@@ -81,6 +82,7 @@ public:
 		int size = nn*mm;// myfile.tellg();		
 		myfile.read ((char*)&zeros[0], sizeof (double)*(size) );		
 		myfile.close();
+		
 		/****************************************************************/
 		
 		
@@ -92,6 +94,7 @@ public:
 			c[j]=zeros[j*nn+(ord)];
 		}
 		
+		/****************************************************************
 		for (int i=0;i<31;i++)
 		{
 			printf("\n");
@@ -99,10 +102,7 @@ public:
 				printf("%4.25e ", zeros[j*nn+i]);
 			
 		}
-		
-		
-		
-		
+		/****************************************************************/
 		
 		//Maximum frequency
 		double	V = c[Nr]/(2*pi*R);   
@@ -143,7 +143,6 @@ public:
 		
 
 		//Auxiliar array for exproting to binary file
-		double *Creal;
 		Creal=(double*)mkl_malloc(Nr*Nr*sizeof(double),16);
 
 	
@@ -172,21 +171,22 @@ public:
 	}
 	
 	// Destructor
-	
+	/*
 	~HankelMatrix()
 	{
-		mkl_free(zeros);
-		mkl_free(c);
-		mkl_free(r);
-		mkl_free(v);
-		mkl_free(C);
-		mkl_free(m1);
-		mkl_free(m2);
-		mkl_free(dr);
-		mkl_free(dv);
+		delete[] zeros;
+		delete[] c;
+		delete[] r;
+		delete[] v;
+		delete[] C;
+		delete[] Creal;
+		delete[] m1;
+		delete[] m2;
+		delete[] dr;
+		delete[] dv;
 		
 	}
-	
+	*/
 	
 	void getAxisBin()
 	{
