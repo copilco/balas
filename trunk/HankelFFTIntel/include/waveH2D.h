@@ -26,8 +26,8 @@ public:
 	double *r,*v,*dr,*dv;
 	double *z,dz,*q,dq,qmax;
 
-	complex *F,*phiHank;
-	complex *F2,*f2;
+	complex *F,*phi;
+	complex *G,*phik;
 	double *pot;
 	
 	complex *rv,*phil;
@@ -62,11 +62,11 @@ public:
 		//space_indicator=0;//We are in position rho space
 		
 		
-		phiHank=new complex[Nr*Nz];		
+		phi=new complex[Nr*Nz];		
 		F=new complex[Nr*Nz];
 		
-		F2=new complex[Nr*Nz];
-		f2=new complex[Nr*Nz];
+		G=new complex[Nr*Nz];
+		phik=new complex[Nr*Nz];
 		
 		pot=new double[Nr*Nz];
 				
@@ -98,11 +98,11 @@ public:
 		
 		for(int i=0;i<Nr*Nz;i++)
 		{
-			phiHank[i]=complex(0.,0.);
+			phi[i]=complex(0.,0.);
 			F[i]=complex(0.,0.);
 			
-			F2[i]=complex(0.,0.);
-			f2[i]=complex(0.,0.);
+			G[i]=complex(0.,0.);
+			phik[i]=complex(0.,0.);
 			
 			pot[i]=0.;
 			
@@ -183,7 +183,7 @@ public:
 		
 		for(int j=0;j<Nr;j++)
 			for(int i=0;i<Nz;i++)
-				norm+=dz*dr[j]*r[j]*real(conj(phiHank[index(j,i)])*phiHank[index(j,i)]);
+				norm+=dz*dr[j]*r[j]*real(conj(phi[index(j,i)])*phi[index(j,i)]);
 		
 		return norm;
 	}
@@ -193,7 +193,7 @@ public:
 		double norm1=norm();
 		for(int i=0;i<Nr*Nz;i++)
 		{
-			phiHank[i]=phiHank[i]/sqrt(norm1);
+			phi[i]=phi[i]/sqrt(norm1);
 		}
 	}
 	
@@ -202,7 +202,7 @@ public:
 	{
 		double vnorm=0.0;
 		for(int i=0;i<Nr;i++)
-			vnorm+=dv[i]*v[i]*real(conj(f2[i])*f2[i]);
+			vnorm+=dv[i]*v[i]*real(conj(phik[i])*phik[i]);
 		
 		return vnorm;
 	}
@@ -216,7 +216,7 @@ public:
 	{
 		for(int i=0;i<Nz;i++)
 			for(int j=0;j<Nr;j++)
-				F[index(j,i)]=phiHank[index(j,i)]/(HH.m1[j]);
+				F[index(j,i)]=phi[index(j,i)]/(HH.m1[j]);
 		
 		
 	}
@@ -225,23 +225,23 @@ public:
 	{
 		for(int i=0;i<Nz;i++)
 			for(int j=0;j<Nr;j++)
-				phiHank[index(j,i)]=F[index(j,i)]*HH.m1[j];
+				phi[index(j,i)]=F[index(j,i)]*HH.m1[j];
 	}
 	
-	void F22f2(HankelMatrix &HH)
+	void G2phik(HankelMatrix &HH)
 	{
 		for(int i=0;i<Nz;i++)
 			for(int j=0;j<Nr;j++)
-				f2[index(j,i)]=F2[index(j,i)]*HH.m2[j];
+				phik[index(j,i)]=G[index(j,i)]*HH.m2[j];
 		
 	}
 
 	
-	void f22F2(HankelMatrix &HH)
+	void phik2G(HankelMatrix &HH)
 	{
 		for(int i=0;i<Nz;i++)
 			for(int j=0;j<Nr;j++)
-				F2[index(j,i)]=f2[index(j,i)]/HH.m2[j];
+				G[index(j,i)]=phik[index(j,i)]/HH.m2[j];
 		
 	}
 	
@@ -254,14 +254,14 @@ public:
 	{
 		complex alpha=complex(1.,0.);
 		complex gamma=complex(0.,0.);
-		cblas_zgemm (CblasRowMajor,CblasNoTrans, CblasNoTrans, Nr, Nz, Nr,&alpha, HH.C, Nr,F,Nz,&gamma, F2, Nz);
+		cblas_zgemm (CblasRowMajor,CblasNoTrans, CblasNoTrans, Nr, Nz, Nr,&alpha, HH.C, Nr,F,Nz,&gamma, G, Nz);
 	}
 	
 	void HankelTransformBack(HankelMatrix &HH)
 	{
 		complex alpha=complex(1.,0.);
 		complex gamma=complex(0.,0.);
-		cblas_zgemm (CblasRowMajor,CblasNoTrans, CblasNoTrans,Nr,Nz,Nr,&alpha,HH.C,Nr,F2,Nz,&gamma,F, Nz);
+		cblas_zgemm (CblasRowMajor,CblasNoTrans, CblasNoTrans,Nr,Nz,Nr,&alpha,HH.C,Nr,G,Nz,&gamma,F, Nz);
 	}
 	
 	
@@ -269,13 +269,13 @@ public:
 	void FFTFor()
 	{
 		for(int j=0;j<Nr;j++)
-			status=DftiComputeForward(hand,&phiHank[j*Nz]);
+			status=DftiComputeForward(hand,&phi[j*Nz]);
 	}
 
 	void FFTBack()
 	{
 		for(int j=0;j<Nr;j++)
-			status=DftiComputeBackward(hand,&phiHank[j*Nz]);
+			status=DftiComputeBackward(hand,&phi[j*Nz]);
 	}
 	
 	void PropKinHFFT(double dt)
@@ -285,7 +285,7 @@ public:
 			for(int i=0;i<Nz;i++)
 			{
 				fase=dospi*dospi*q[i]*q[i]*dt/2.;
-				phiHank[index(j,i)]*=exp(I*fase);
+				phi[index(j,i)]*=exp(I*fase);
 			}
 		
 	}
@@ -358,20 +358,20 @@ public:
 		{
 			
 			//Starting Right
-			rv[0] =   conj(a[0])*phiHank[index(1,i)]+conj(b[0])*phiHank[index(0,i)]+conj( c[0] )*phiHank[index(1,i)];	
+			rv[0] =   conj(a[0])*phi[index(1,i)]+conj(b[0])*phi[index(0,i)]+conj( c[0] )*phi[index(1,i)];	
 
 			for (int j=1; j<Nr-1; j++) 	
-				rv[j] = conj(a[j])*phiHank[index(j-1,i)]+conj( b[j] )*phiHank[index(j,i)]+conj(c[j])*phiHank[index(j+1,i)];
+				rv[j] = conj(a[j])*phi[index(j-1,i)]+conj( b[j] )*phi[index(j,i)]+conj(c[j])*phi[index(j+1,i)];
 
 			//Finishing right
-			rv[Nr-1] = conj(a[Nr-1])*phiHank[index(Nr-2,i)]+conj(b[Nr-1])*phiHank[index(Nr-1,i)];//+conj(c[Nr-1]);//*phiHank[index(Nr-2,i)]*zero;
+			rv[Nr-1] = conj(a[Nr-1])*phi[index(Nr-2,i)]+conj(b[Nr-1])*phi[index(Nr-1,i)];//+conj(c[Nr-1]);//*phi[index(Nr-2,i)]*zero;
 			
 			
 			//Solving Triagonal Matrix
 			tridag(a,b,c,rv,phil,Nr,gam1);
 			
 			for(int j=0;j<Nr;j++)
-				phiHank[index(j,i)]=phil[j];
+				phi[index(j,i)]=phil[j];
 	
 		}		  
 	}
@@ -401,24 +401,24 @@ public:
 			
 			
 			//Right part Z
-			rv_z[0]		=   conj(bz[0])*phiHank[index(j,0)]   + 
-			conj( cz  )*phiHank[index(j,1)];	
+			rv_z[0]		=   conj(bz[0])*phi[index(j,0)]   + 
+			conj( cz  )*phi[index(j,1)];	
 			
 			
 			for (int i=1; i<Nz-1; i++) 
-				rv_z[i] =	conj( az    )*phiHank[index(j,i-1)] + 
-				conj( bz[i] )*phiHank[index(j,i)]   + 
-				conj( cz    )*phiHank[index(j,i+1)];
+				rv_z[i] =	conj( az    )*phi[index(j,i-1)] + 
+				conj( bz[i] )*phi[index(j,i)]   + 
+				conj( cz    )*phi[index(j,i+1)];
 			
 			
-			rv_z[Nz-1]	=	conj( az  )*phiHank[index(j,Nz-2)]  +
-			conj( bz[Nz-1]  )*phiHank[index(j,Nz-1)];	
+			rv_z[Nz-1]	=	conj( az  )*phi[index(j,Nz-2)]  +
+			conj( bz[Nz-1]  )*phi[index(j,Nz-1)];	
 			//Finishing right part Z
 			
 			//Zeros on Z
-			//zeros(phiHank_z);		
+			//zeros(phi_z);		
 			//for(int i=0;i<Nz;i++)
-			//	phiHank_z[i]=complex(0.,0.);
+			//	phi_z[i]=complex(0.,0.);
 			
 			
 			//Solving Triagonal Matrix	for Z
@@ -427,7 +427,7 @@ public:
 			
 			//Save function 
 			for (int i=0; i<Nz; i++)
-				phiHank[j*Nz+i] =phi_z[i];		//psi0[index(i,j,nz)] = psi0[index(i,j,nz)];//
+				phi[j*Nz+i] =phi_z[i];		//psi0[index(i,j,nz)] = psi0[index(i,j,nz)];//
 		}	
 	}
 	
