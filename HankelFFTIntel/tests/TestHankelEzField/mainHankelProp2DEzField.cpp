@@ -198,10 +198,10 @@ int main()
         /////////////////////////////////////////////////////////////////////////////////
         
         
-        
+		
+        w.FFTFor();
         w.phi2F(HH);
         w.HankelTransform(HH);
-		w.FFTFor();
 		
 		fase=complex(0.,0.);
 		
@@ -212,10 +212,10 @@ int main()
 				w.G[w.index(j,i)]*=exp(-I*fase);
 			}
         
-        w.FFTBack();
+        
         w.HankelTransformBack(HH);
         w.F2phi(HH);		
-		
+		w.FFTBack();
 		
 		
         ////////////////////////////////////////////

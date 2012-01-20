@@ -3,10 +3,10 @@
 A0=importdata('out0.txt');
 A1=importdata('out1.txt');
 
-nr=520;
-nz=680;
+nr=500;
+nz=500;
 
-Ntime=200;
+Ntime=400;
 Nsnap=30;
 
 cc=Ntime/Nsnap;
@@ -25,22 +25,22 @@ axis tight
 
 %%
 
-scrsz = get(0,'ScreenSize');
-figure('Position',[1 scrsz(4)/2 scrsz(3)/1.7 scrsz(4)/1.7],...
-    'Color','w');
-
-
-for i=1:20
-    
-    clf;
-    
-    
-    Out=reshape(A1((i-1)*nz*nr+1:i*nz*nr),nz,nr);
-    
-    surf(Out,'FaceColor','interp',...
-        'EdgeColor','none')
-    view(2)
-    axis tight
-
-    pause(0.3)
-end
+% scrsz = get(0,'ScreenSize');
+% figure('Position',[1 scrsz(4)/2 scrsz(3)/1.7 scrsz(4)/1.7],...
+%     'Color','w');
+% 
+% 
+% for i=1:20
+%     
+%     clf;
+%     
+%     
+%     Out=reshape(A1((i-1)*nz*nr+1:i*nz*nr),nz,nr);
+%     
+%     surf(Out,'FaceColor','interp',...
+%         'EdgeColor','none')
+%     view(2)
+%     axis tight
+% 
+%     pause(0.3)
+% end

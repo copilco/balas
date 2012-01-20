@@ -29,7 +29,7 @@ xmax = 24;
 ymin =-15;
 ymax = 15;
 
-for j=1:1%Nsnap
+for j=1:Nsnap
     %clf
     
     scrsz = get(0,'ScreenSize');
@@ -74,7 +74,7 @@ for j=1:1%Nsnap
   %  F = getframe(fig);
   %  aviobj = addframe(aviobj,F); 
 %end 
-    pause(0.2)
+    pause(0.1)
  %   display(j);
 end    
     

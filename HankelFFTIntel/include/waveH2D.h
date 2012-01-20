@@ -23,7 +23,8 @@ public:
 
 	int Nr,Nz;
 	int space_indicator;  //Defines in which space you are.
-	double *r,*v,*dr,*dv;
+	double *r, *dr;
+	double *v, *dv, *kr, *dkr;
 	double *z,dz,*q,dq,qmax;
 
 	complex *F,*phi;
@@ -71,9 +72,13 @@ public:
 		pot=new double[Nr*Nz];
 				
 		r=new double[Nr];
-		v=new double[Nr];
 		dr=new double[Nr];
+		
+		v=new double[Nr];
 		dv=new double[Nr];
+		kr=new double[Nr];
+		dkr=new double[Nr];
+		
 		
 		z=new double[Nz];
 		q=new double[Nz];
@@ -115,16 +120,22 @@ public:
 		for(int i=0;i<Nr;i++)
 		{
 			r[i]=HH.r[i];
-			v[i]=HH.v[i];
 			dr[i]=HH.dr[i];
+			
+			v[i]=HH.v[i];
 			dv[i]=HH.dv[i];
+
+			kr[i]=HH.kr[i];
+			dkr[i]=HH.dkr[i];
+			
 		}
 		
 		for (int i=0; i<Nz; i++)
 			z[i] =(-(Nz-1)/2. + i)*dz;
 		
-		double dq=dospi/Nz/dz;
-		double qmax=pi/dz;
+		dq=dospi/Nz/dz;
+		
+		qmax=pi/dz;
 		
 		for(int k=0;k<Nz/2;k++)
 			q[k]=(k)*dq;
@@ -198,13 +209,15 @@ public:
 	}
 	
 	
-	double vnorm()
+	double qnorm()
 	{
-		double vnorm=0.0;
-		for(int i=0;i<Nr;i++)
-			vnorm+=dv[i]*v[i]*real(conj(phik[i])*phik[i]);
+		double qnorm=0.0;
 		
-		return vnorm;
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+				qnorm+=dq*dv[j]*v[j]*real(conj(phik[index(j,i)])*phik[index(j,i)]);
+		
+		return qnorm;
 	}
 	
 	/***********************************************************/	
@@ -510,6 +523,79 @@ public:
 		
 	}
 	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	///////////////////////////////////////////////
+    //  Operators in Schrödinger representation  //
+    ///////////////////////////////////////////////
+	
+	
+	double expectedZ()
+	{
+		double zExpected=0.0;
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+				zExpected+=dz*dr[j]*r[j]*z[i]*real(conj(phi[index(j,i)])*phi[index(j,i)]);
+		
+		return zExpected;
+	}
+	
+	double expectedRHO()
+	{
+		double RhoExpected=0.0;
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+				RhoExpected+=dz*dr[j]*r[j]*r[j]*real(conj(phi[index(j,i)])*phi[index(j,i)]);
+		
+		return RhoExpected;
+	}
+	
+	
+	double kinetic_energy(HankelMatrix &HH)
+	{
+		
+		FFTFor();
+		phi2F(HH);
+		HankelTransform(HH);
+		G2phik(HH);
+		
+		
+		
+		double energy = 0.;
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+			{
+				//energy+=dq*dv[j]*v[j]*real(conj(phik[index(j,i)])*phik[index(j,i)]);
+				energy+=dq*dv[j]*v[j]*((q[i]*q[i])/2.+dospi*dospi*(v[j]*v[j])/2.)*real(conj(phik[index(j,i)])*phik[index(j,i)]);
+				//energy+=dq*dkr[j]*kr[j]*((q[i]*q[i])/2.+(kr[j]*kr[j])/2.)/dospi/dospi*real(conj(phik[index(j,i)])*phik[index(j,i)]);
+			}
+		
+		phik2G(HH);
+		HankelTransformBack(HH);
+		F2phi(HH);
+		FFTBack();
+		
+		
+		return energy;
+		
+	}
+	
+	
+	double pot_energy(double *pot)
+	{
+		double potE;
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+				potE+=dz*dr[j]*r[j]*pot[index(j,i)]*real(conj(phi[index(j,i)])*phi[index(j,i)]);
+		
+		
+		return potE;
+		
+	}
 	
 	
 		

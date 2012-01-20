@@ -158,9 +158,10 @@ int main()
         /////////////////////////////////////////////////////
         
         
+		//wrho.FFTFor();
         wrho.phi2F(HH);
         wrho.HankelTransform(HH);
-		//wrho.FFTFor();
+		
 		
 		faseHankel=0.;
         
@@ -171,25 +172,21 @@ int main()
 				wrho.G[wrho.index(j,i)]*=exp(I*faseHankel);
 			}
 
-        //wrho.FFTBack();
+
         wrho.HankelTransformBack(HH);
         wrho.F2phi(HH);
-
+		//wrho.FFTBack();
+		
         
         //////////////////////////////////////
         //  Evolve only in z axis with FFT  //
         //////////////////////////////////////
         
         
+		wz.FFTFor();
         //wz.phi2F(HH);
         //wz.HankelTransform(HH);
-		//wz.FFTFor();
-		
-		for(int j=0;j<Nr;j++)
-			stat=DftiComputeForward(handle,&wz.phi[j*Nz]);
-		
-        
-        
+	
         
 		faseFFT=0.;
         
@@ -199,17 +196,13 @@ int main()
 				faseFFT=wz.q[i]*wz.q[i]*dt/2.;
 				wz.phi[wz.index(j,i)]*=exp(I*faseFFT);
 			}
-        
-        
-        
-		for(int j=0;j<Nr;j++)
-			stat=DftiComputeBackward(handle,&wz.phi[j*Nz]);
 		
 
-		//wz.FFTBack();
         //wz.HankelTransformBack(HH);
         //wz.F2phi(HH);
+		wz.FFTBack();
 
+		
         
         
         ///////////////////////////
@@ -217,9 +210,9 @@ int main()
         ///////////////////////////
         
         
+		w.FFTFor();
         w.phi2F(HH);
         w.HankelTransform(HH);
-		w.FFTFor();
 		
 		fase=0.;
 		
@@ -229,11 +222,12 @@ int main()
 				fase=dospi*dospi*HH.v[j]*HH.v[j]*dt/2.+w.q[i]*w.q[i]*dt/2.;
 				w.G[w.index(j,i)]*=exp(I*fase);
 			}
+
         
-        w.FFTBack();
         w.HankelTransformBack(HH);
         w.F2phi(HH);
-        
+		w.FFTBack();
+
         
         
         ///////////////////////////////////
