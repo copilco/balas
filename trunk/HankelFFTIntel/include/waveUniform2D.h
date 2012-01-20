@@ -492,6 +492,59 @@ public:
 			}//End the loop on ij
 	}
 	
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	///////////////////////////////////////////////
+    //  Operators in Schrödinger representation  //
+    ///////////////////////////////////////////////
+	
+	
+	double expectedZ()
+	{
+		double zExpected=0.0;
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+				zExpected+=dz*dr*r[j]*z[i]*real(conj(phi[index(j,i)])*phi[index(j,i)]);
+		
+		return zExpected;
+	}
+	
+	double expectedRHO()
+	{
+		double RhoExpected=0.0;
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+				RhoExpected+=dz*dr*r[j]*r[j]*real(conj(phi[index(j,i)])*phi[index(j,i)]);
+		
+		return RhoExpected;
+	}
+	
+	/*
+	double kinetic_energy(HankelMatrix &HH)
+	{
+		double energy;
+		
+		
+		return energy;
+		
+	}
+	*/
+	double pot_energy(double *pot)
+	{
+		double potE;
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+				potE+=dz*dr*r[j]*pot[index(j,i)]*real(conj(phi[index(j,i)])*phi[index(j,i)]);
+		
+		
+		return potE;
+		
+	}
+	
 		
 };
 #endif // TOOLS_H

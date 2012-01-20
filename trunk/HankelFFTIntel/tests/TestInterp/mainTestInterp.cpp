@@ -55,9 +55,9 @@ int main()
     double rho0  = Rmax/2.;
 	double rho00 = 12.;
 	double z0    = 0.;		
-	double v0r   = 5.;
+	double v0r   = 0.;//5.;
 	double v0z   = 0.0;	
-	double sigma = 25;
+	double sigma = 25.;
     
     // Print out the information on the screen
     
@@ -158,9 +158,9 @@ int main()
         //////////////////////////////////
         
         
+		wH.FFTFor();
         wH.phi2F(HH);
         wH.HankelTransform(HH);
-		wH.FFTFor();
 		
 		fase=0.;
 		
@@ -171,10 +171,11 @@ int main()
 				wH.G[wH.index(j,i)]*=exp(I*fase);
 			}
         
-        wH.FFTBack();
+		
         wH.HankelTransformBack(HH);
         wH.F2phi(HH);
-        
+		wH.FFTBack();
+
         
         ////////////////////////////////
         //  Evolve in Crank-Nicolson  //

@@ -47,6 +47,7 @@ public:
 	double *c;
 	double *r;
 	double *v;
+	double *kr;
 	complex *C;
 	double *Creal;
 	double *m1;
@@ -54,6 +55,7 @@ public:
     
     double *dr;
     double *dv;
+	double *dkr;
 	
 	FILE *in0;
 		
@@ -107,22 +109,23 @@ public:
 		//Maximum frequency
 		double	V = c[Nr]/(2*pi*R);   
 		
-		//The axes for the rho and the krho coordinate
+		//The axes for the rho, the v coordinate (spatial frequency), and the kr coordinate (wavevector)
 		r=(double*)mkl_malloc(1*Nr*sizeof(double),16);
 		v=(double*)mkl_malloc(1*Nr*sizeof(double),16);
+		kr=(double*)mkl_malloc(1*Nr*sizeof(double),16);
 		
 		
 		for(int i=0;i<Nr;i++)
 		{
 			r[i] = c[i]*R/c[Nr];   // Radius vector
 			v[i] = c[i]/(2*pi*R);
-			
+			kr[i] = dospi*v[i];
 		}
-		
 		
         dr=(double*)mkl_malloc(Nr*sizeof(double),16);
         dv=(double*)mkl_malloc(Nr*sizeof(double),16);
-        
+        dkr=(double*)mkl_malloc(Nr*sizeof(double),16);
+		
 		//The definition of the diferential of r is dr[0]=r[i+1]-r[i]
 		//This mean that we need to provide a last number by hand, this is done in the next two lines.
 		
@@ -133,8 +136,11 @@ public:
         }
         
         dr[Nr-1]=R-r[Nr-1];       //This way the array has Nr elements
-        dv[Nr-1]=c[Nr]/(2*pi*R);  
-        
+        //dv[Nr-1]=c[Nr]/(2*pi*R);  
+		dv[Nr-1]=dv[Nr-2];
+		
+		for(int i=0;i<Nr;i++)
+			dkr[i]=dospi*dv[i];
 		
 		//The bessel functions and the matrix itself
 		C=(complex*)mkl_malloc(Nr*Nr*sizeof(complex),16);
@@ -171,22 +177,24 @@ public:
 	}
 	
 	// Destructor
-	/*
+	
 	~HankelMatrix()
 	{
-		delete[] zeros;
-		delete[] c;
-		delete[] r;
-		delete[] v;
-		delete[] C;
-		delete[] Creal;
-		delete[] m1;
-		delete[] m2;
-		delete[] dr;
-		delete[] dv;
+		mkl_free(zeros);
+		mkl_free(c);
+		mkl_free(r);
+		mkl_free(v);
+		mkl_free(kr);
+		mkl_free(C);
+		mkl_free(Creal);
+		mkl_free(m1);
+		mkl_free(m2);
+		mkl_free(dr);
+		mkl_free(dv);
+		mkl_free(dkr);
 		
 	}
-	*/
+	
 	
 	void getAxisBin()
 	{

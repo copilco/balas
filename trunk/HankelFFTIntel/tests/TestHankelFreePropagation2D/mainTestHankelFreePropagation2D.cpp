@@ -38,6 +38,7 @@ int main()
     int Nz=680;
     
     double dz=0.1;
+	double dr=0.1;
     double dt=0.01;
     
     int Ntime=200;
@@ -45,13 +46,13 @@ int main()
     
     //Gaussian parameters
     
-	double Rmax  = 52.;//ceil(Nr*dz);
+	double Rmax  = ceil(Nr*dr);
     double rho0  = Rmax/2.;
 	double rho00 = 12.;
 	double z0    = 0.;		
 	double v0r   = 0.;//5.;
 	double v0z   = 0.0;	
-	double sigma = 5.;
+	double sigma = 1.;
     
     // Print out the information on the screen
         
@@ -131,9 +132,10 @@ int main()
         ///////////////
         
         
+		w.FFTFor();
         w.phi2F(HH);
         w.HankelTransform(HH);
-		w.FFTFor();
+		
 		
 		fase=0.;
 		
@@ -144,9 +146,10 @@ int main()
 				w.G[w.index(j,i)]*=exp(-I*fase);
 			}
         
-        w.FFTBack();
+        
         w.HankelTransformBack(HH);
         w.F2phi(HH);
+		w.FFTBack();
         
         
         ////////////////////////////////////////////
@@ -168,7 +171,7 @@ int main()
         /////////////////////////
 		
 		
-		w.absorber(0.1,0.,0.1,0.,1./6.);
+		w.absorber(0.1,0.1,0.1,0.1,1./6.);
 	
 	
     }
