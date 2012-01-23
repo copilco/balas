@@ -28,7 +28,7 @@ int main()
     fstream axis("axis.txt",ios::out);
     fstream out0("out0.txt",ios::out);
     fstream out1("out1.txt",ios::out);
-    
+	fstream outEne("outEne.txt",ios::out);
     
     //////////////////
     //  Parameters  //
@@ -45,7 +45,7 @@ int main()
     double echarge=-1.;
     double soft_core=2.;
     
-    int Ntime=500;
+    int Ntime=5000;
     int snap=20;
     
     //Gaussian parameters
@@ -56,7 +56,7 @@ int main()
     double z0    = 0.;		
     double v0r   = 0.;//5.;
     double v0z   = 0.0;	
-    double sigma = 10.;
+    double sigma = 5.;
     
     // Print out the information on the screen
     
@@ -91,13 +91,14 @@ int main()
     
     
     for(int j=0; j<Nr; j++)
-      for (int i=0; i<Nz; i++)
+		for (int i=0; i<Nz; i++)
         {
-	  //w.phi[w.index(i,j)]=exp(-(w.r[j]-rho0)*(w.r[j]-rho0)/sigma/sigma-(w.z[i]*w.z[i])/sigma/sigma);
-	  w.phi[w.index(j,i)]= w.r[j]*exp(  -(w.r[j] - rho0)*(w.r[j] - rho0)/sigma/sigma -(w.z[i] - z0)*(w.z[i] - z0)/sigma/sigma );//*exp(I* (v0r*(w.r[j] - rho0) + v0z*(w.z[i] - z0))  );
-	  
-	  //Set potential
-	  v[w.index(j,i)]=-4./sqrt(soft_core+(w.r[j])*(w.r[j])+(w.z[i])*(w.z[i]));
+			//w.phi[w.index(i,j)]=exp(-(w.r[j]-rho0)*(w.r[j]-rho0)/sigma/sigma-(w.z[i]*w.z[i])/sigma/sigma);
+			w.phi[w.index(j,i)]= w.r[j]*exp(  -(w.r[j] - rho0)*(w.r[j] - rho0)/sigma/sigma -(w.z[i] - z0)*(w.z[i] - z0)/sigma/sigma );//*exp(I* (v0r*(w.r[j] - rho0) + v0z*(w.z[i] - z0))  );
+			
+			
+			//Set potential
+			v[w.index(j,i)]=-1./sqrt(soft_core+(w.r[j]-rho0)*(w.r[j]-rho0)+(w.z[i]-z0)*(w.z[i]-z0));
 		}
     
     
@@ -107,47 +108,20 @@ int main()
     w.normalize();
     cout << "Initial norm: " << w.norm() << endl << endl;
     
-	/*
-	cout << dq << endl;
-	
-	for(int j=0;j<Nr;j++)
-		cout << "dr: " << w.dr[j] << "  dv: " << w.dv[j] << endl;
-	
-    
-	// Operator's festival
-	
-	double zeta = w.expectedZ();
-	
-	printf("Valor esperado de z: %e\n",zeta);
-	
-	double erre = w.expectedRHO();
-	
-	printf("Valor esperado de rho: %e\n",erre);
-	
-	double potencial = w.pot_energy(v);
-	
-	printf("Valor esperado del potencial: %e\n",potencial);
-	
-	double ener = w.kinetic_energy(HH);
-	
-	printf("Valor esperado de la energía cinética: %e\n",ener);
-	
-	*/
-	
-    
+		
     //////////////////////////////////////////
     //  Save initial wavefunction and axis  //
     //////////////////////////////////////////
     
     for(int j=0;j<Nr;j++)
-      axis << w.r[j] << endl;
+		axis << w.r[j] << endl;
     
     for(int j=0;j<Nz;j++)
-      axis << w.z[j] << endl;
+		axis << w.z[j] << endl;
     
     for(int j=0;j<Nr;j++)
-      for(int i=0;i<Nz;i++)
-		  out0 << abs(conj(w.phi[w.index(j,i)])*w.phi[w.index(j,i)])*w.r[j] << endl;
+		for(int i=0;i<Nz;i++)
+			out0 << abs(conj(w.phi[w.index(j,i)])*w.phi[w.index(j,i)])*w.r[j] << endl;
     
     
     //////////////////////////////////////
@@ -156,107 +130,117 @@ int main()
     
     
     complex dt=-I*absdt;
-    double ener = 0.;
-    
-    for (int ktime=0; ktime<Ntime; ktime++)
-      {
+    //complex dt=complex(0.,-absdt);
+	//complex dt=complex(absdt,0.);
 	
+	double ene1 = 0.;
+	double ene2 = 0.;
+	
+    for (int ktime=0; ktime<Ntime; ktime++)
+	{
+		
         cout << "Loop number: " << ktime << endl;
         
-		  
-		  
-		  ///////////////
-		  //  Evolve   //
-		  ///////////////
-		  
-		  w.FFTFor();        
-		  w.phi2F(HH);
-		  w.HankelTransform(HH);
-		  
-		  
-		  fase=complex(0.,0.);
-		  
-		  for(int j=0;j<Nr;j++)
-			  for(int i=0;i<Nz;i++)
-			  {
-				  fase=dospi*dospi*HH.v[j]*HH.v[j]*dt/4.+w.q[i]*w.q[i]*dt/4.;
-				  w.G[w.index(j,i)]*=exp(-I*fase);
-			  }
-		  
-		  
-		  w.HankelTransformBack(HH);
-		  w.F2phi(HH);
-		  w.FFTBack();        
-		  
-		  
-		  
-		  /////////////////////////////////////////////////////////////////////////////////
-		  
-		  fase=complex(0.,0.);
-		  
-		  
-		  for(int j=0;j<Nr;j++)
-			  for(int i=0;i<Nz;i++)
-			  {
-				  fase=v[w.index(j,i)]*dt/2.;
-				  w.phi[w.index(j,i)]*=exp(-I*fase);
-			  }
-		  
-		  
-		  
-		  /////////////////////////////////////////////////////////////////////////////////
-		  
-		  
-		  w.FFTFor();
-		  w.phi2F(HH);
-		  w.HankelTransform(HH);
+		
+		///////////////
+		//  Evolve   //
+		///////////////
+		
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		w.FFTFor();        
+		w.phi2F(HH);
+		w.HankelTransform(HH);
+		
+		
+		fase=complex(0.,0.);
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+			{
+				fase=dospi*dospi*HH.v[j]*HH.v[j]*dt/4.+w.q[i]*w.q[i]*dt/4.;
+				w.G[w.index(j,i)]*=exp(-I*fase);
+			}
+		
+		
+		w.HankelTransformBack(HH);
+		w.F2phi(HH);
+		w.FFTBack();        
+		
+		
+		
+		/////////////////////////////////////////////////////////////////////
+		
+		fase=complex(0.,0.);
+		
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+			{
+				fase=v[w.index(j,i)]*dt/2.;
+				w.phi[w.index(j,i)]*=exp(-I*fase);
+			}
+		
+		
+		
+		//////////////////////////////////////////////////////////////////////
+		
+		
+		w.FFTFor();
+		w.phi2F(HH);
+		w.HankelTransform(HH);
+		
+		
+		fase=complex(0.,0.);
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+			{
+				fase=dospi*dospi*HH.v[j]*HH.v[j]*dt/4.+w.q[i]*w.q[i]*dt/4.;
+				w.G[w.index(j,i)]*=exp(-I*fase);
+			}
+		
+		
+		w.HankelTransformBack(HH);
+		w.F2phi(HH);
+		w.FFTBack();
+		
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-		  
-		  fase=complex(0.,0.);
-		  
-		  for(int j=0;j<Nr;j++)
-			  for(int i=0;i<Nz;i++)
-			  {
-				  fase=dospi*dospi*HH.v[j]*HH.v[j]*dt/4.+w.q[i]*w.q[i]*dt/4.;
-				  w.G[w.index(j,i)]*=exp(-I*fase);
-			  }
-		  
-		  
-		  w.HankelTransformBack(HH);
-		  w.F2phi(HH);
-		  w.FFTBack();
-		  
-		  cout << "Norm: " <<  w.norm() << endl;
-		  
-		  
-		  //w.normalize();
-		  
-		  ener = w.kinetic_energy(HH);
-		  
-		  cout << "Kinetic energy (Expected value):  " << ener << endl;
-		  cout << "Norm after Transform  " << w.norm() << endl;
-		  
-		  
-		  ////////////////////////////////////////////
-		  // Take the snapshot of the wavefunction  //
-		  ////////////////////////////////////////////
-		  
-		  
-		  
-		  if(ktime%(Ntime/(snap-1)) == 0)
-			  for(int j=0;j<Nr;j++)
-				  for(int i=0;i<Nz;i++)
-					  out1 << abs(conj(w.phi[w.index(j,i)])*w.phi[w.index(j,i)])*w.r[j] << endl;	
-		  
-		  
-		  
-	  }
+		w.normalize();
+		
+		//cout << "Norm in frequency space: " << w.qnorm(HH) << endl;
+		
+		ene1 = w.kinetic_energy(HH)+w.pot_energy(v);
+		
+		cout << "Energy (Expected value):  " << ene1 << "Error: " << log10(abs(ene1-ene2)) << endl;
+		cout << "Norm after Transform  " << w.norm() << endl;
+		
+		outEne << ene1 << "  " << log10(abs(ene1-ene2)) << endl;
+		
+		ene2=ene1;
+		
+		////////////////////////////////////////////
+		// Take the snapshot of the wavefunction  //
+		////////////////////////////////////////////
+		
+		
+		
+		if(ktime%(Ntime/(snap-1)) == 0)
+			for(int j=0;j<Nr;j++)
+				for(int i=0;i<Nz;i++)
+					out1 << abs(conj(w.phi[w.index(j,i)])*w.phi[w.index(j,i)])*w.r[j] << endl;	
+		
+		
+		
+	}
 	
     
 	axis.close();
     out0.close();
     out1.close();
-    
+    outEne.close();
+	
     delete[] v;
     
 }
