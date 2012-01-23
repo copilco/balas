@@ -209,15 +209,27 @@ public:
 	}
 	
 	
-	double qnorm()
+	double qnorm(HankelMatrix &HH)
 	{
 		double qnorm=0.0;
+		
+		FFTFor();
+		phi2F(HH);
+		HankelTransform(HH);
+		G2phik(HH);
 		
 		for(int j=0;j<Nr;j++)
 			for(int i=0;i<Nz;i++)
 				qnorm+=dq*dv[j]*v[j]*real(conj(phik[index(j,i)])*phik[index(j,i)]);
 		
+		
+		phik2G(HH);
+		HankelTransformBack(HH);
+		F2phi(HH);
+		FFTBack();
+		
 		return qnorm;
+	
 	}
 	
 	/***********************************************************/	
@@ -568,7 +580,6 @@ public:
 		for(int j=0;j<Nr;j++)
 			for(int i=0;i<Nz;i++)
 			{
-				//energy+=dq*dv[j]*v[j]*real(conj(phik[index(j,i)])*phik[index(j,i)]);
 				energy+=dq*dv[j]*v[j]*((q[i]*q[i])/2.+dospi*dospi*(v[j]*v[j])/2.)*real(conj(phik[index(j,i)])*phik[index(j,i)]);
 				//energy+=dq*dkr[j]*kr[j]*((q[i]*q[i])/2.+(kr[j]*kr[j])/2.)/dospi/dospi*real(conj(phik[index(j,i)])*phik[index(j,i)]);
 			}
@@ -586,7 +597,7 @@ public:
 	
 	double pot_energy(double *pot)
 	{
-		double potE;
+		double potE=0.;
 		
 		for(int j=0;j<Nr;j++)
 			for(int i=0;i<Nz;i++)

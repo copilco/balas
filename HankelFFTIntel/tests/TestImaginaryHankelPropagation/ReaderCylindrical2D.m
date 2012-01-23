@@ -6,10 +6,10 @@ ax = importdata('axis.txt');
 A1 = importdata('out1.txt');
 
 %% 
-nr = 100
-nz = 200
+nr = 520
+nz = 680
 
-Ntime = 200
+Ntime = 1000
 snap  = 20
 
 Nsnap = 20;%floor(Ntime/snap);
@@ -29,20 +29,20 @@ xmax = 24;
 ymin =-15;
 ymax = 15;
 
-%scrsz = get(0,'ScreenSize');
-%  figure('Position',[1 scrsz(4)/2 scrsz(3)/1.7 scrsz(4)/1.7],...
-%     'Color','w');
-    
-scrsz = get(0,'ScreenSize');
-    figure('Position',[1 scrsz(4)/2 scrsz(3)/2. scrsz(4)/1.7],...
-        'Color','w');
+
+
+% scrsz = get(0,'ScreenSize');
+%     figure('Position',[1 scrsz(4)/2 scrsz(3)/2. scrsz(4)/1.7],...
+%         'Color','w');
     
     
 for j=1:Nsnap
     
-    clf
+    %clf
     
-    
+    scrsz = get(0,'ScreenSize');
+    figure('Position',[1 scrsz(4)/2 scrsz(3)/2. scrsz(4)/1.7],...
+        'Color','w');
     
     PHI=reshape(A1(1+nr*nz*(j-1):nr*nz*j),nz,nr);
     
