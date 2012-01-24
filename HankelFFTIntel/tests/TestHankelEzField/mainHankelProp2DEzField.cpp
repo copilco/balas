@@ -20,7 +20,7 @@ int main()
 {
     cout << "\n\n/////////////////////////////////////////////" << endl;
     cout << "/////////////////////////////////////////////" << endl;
-    cout << "mainHankelProp2D. Running example..." << endl;
+    cout << "mainHankelProp2DEzField. Running example..." << endl;
     cout << "/////////////////////////////////////////////" << endl;
 	cout << "/////////////////////////////////////////////" << endl;
 	
@@ -42,22 +42,21 @@ int main()
 	complex dt;
 	complex t;
     
-	double *v = new double[Nr*Nz];
     double echarge=-1.;
     double soft_core=2.;
 	
-    int Ntime=2000;
+    int Ntime=2500;
     int snap=20;
     
     //Gaussian parameters
     
-	double Rmax  = 52.;//ceil(Nr*dr);
+	double Rmax  = 100.;//ceil(Nr*dr);
     double rho0  = Rmax/2.;
 	double rho00 = 12.;
 	double z0    = 0.;		
 	double v0r   = 0.;//5.;
 	double v0z   = 0.0;	
-	double sigma = 5.;
+	double sigma = 1.;
 	
 	//Laser parameters
 	
@@ -79,7 +78,7 @@ int main()
     cout << "dz: " << dz << endl;
     cout << "dt: " << absdt << endl;
     cout << "Ntime: " << Ntime << endl;
-    cout << "Snapshots: " << snap << endl;
+    cout << "Snapshots: " << Ntime/snap << endl;
     cout << "Rmax: " << Rmax << endl;
     cout << "rho0: " << rho0 << endl;
     cout << "rho00: " << rho00 << endl;
@@ -110,7 +109,7 @@ int main()
 			w.phi[w.index(j,i)]= w.r[j]*exp(  -(w.r[j] - rho0)*(w.r[j] - rho0)/sigma/sigma -(w.z[i] - z0)*(w.z[i] - z0)/sigma/sigma )*exp(I*(v0r*(w.r[j] - rho0) + v0z*(w.z[i] - z0)) );
 			
 			//Set potential
-			v[w.index(j,i)]=echarge/sqrt(soft_core+(w.r[j]-rho0)*(w.r[j]-rho0)+(w.z[i]-z0)*(w.z[i]-z0));
+			w.pot[w.index(j,i)]=echarge/sqrt(soft_core+(w.r[j]-rho0)*(w.r[j]-rho0)+(w.z[i]-z0)*(w.z[i]-z0));
 		}
     
     
@@ -153,7 +152,7 @@ int main()
 		
 		efield_z=e0*sin(ww*abs(t)/2./cycle_number)*sin(ww*abs(t)/2./cycle_number)*sin(ww*abs(t)+cep);
 		
-		avect_z=sin(ww*abs(t));//-efield_z*abs(dt);//*lightC_au;
+		avect_z=-efield_z*abs(dt)*lightC_au;
 		
 		//cout << "Avector_z: " << avect_z << endl;
         
@@ -161,61 +160,10 @@ int main()
         //  Evolve   //
         ///////////////
         
-        
-        w.phi2F(HH);
-        w.HankelTransform(HH);
-		w.FFTFor();
 		
-		fase=complex(0.,0.);
-		
-        for(int j=0;j<Nr;j++)
-			for(int i=0;i<Nz;i++)
-			{
-				fase=dospi*dospi*HH.v[j]*HH.v[j]*dt/2.+(w.q[i]-avect_z)*(w.q[i]-avect_z)*dt/4.;
-				w.G[w.index(j,i)]*=exp(-I*fase);
-			}
-        
-        w.FFTBack();
-        w.HankelTransformBack(HH);
-        w.F2phi(HH);
-        
-        
-		/////////////////////////////////////////////////////////////////////////////////
-        
-		
-        fase=complex(0.,0.);
-		
-        
-        for(int j=0;j<Nr;j++)
-			for(int i=0;i<Nz;i++)
-			{
-				fase=v[w.index(j,i)]*dt/2.;
-				w.phi[w.index(j,i)]*=exp(-I*fase);
-			}
-        
-        
-        
-        /////////////////////////////////////////////////////////////////////////////////
-        
-        
-		
-        w.FFTFor();
-        w.phi2F(HH);
-        w.HankelTransform(HH);
-		
-		fase=complex(0.,0.);
-		
-        for(int j=0;j<Nr;j++)
-			for(int i=0;i<Nz;i++)
-			{
-				fase=dospi*dospi*HH.v[j]*HH.v[j]*dt/4.+(w.q[i]-avect_z)*(w.q[i]-avect_z)*dt/4.;
-				w.G[w.index(j,i)]*=exp(-I*fase);
-			}
-        
-        
-        w.HankelTransformBack(HH);
-        w.F2phi(HH);		
-		w.FFTBack();
+        w.prop_kinetic(HH,dt/2.,avect_z,0.0);
+		w.prop_potencial(dt);
+		w.prop_kinetic(HH,dt/2.,avect_z,0.);
 		
 		
         ////////////////////////////////////////////
@@ -224,7 +172,7 @@ int main()
 		
 		cout << "Error norm: " << 1.-w.norm() << endl << endl;
         
-		if(ktime%(Ntime/(snap-1)) == 0)
+		if((ktime%snap) == 0)
 			for(int j=0;j<Nr;j++)
 				for(int i=0;i<Nz;i++)
 					out1 << abs(conj(w.phi[w.index(j,i)])*w.phi[w.index(j,i)])*w.r[j] << endl;	
@@ -247,7 +195,6 @@ int main()
     out0.close();
     out1.close();
 	
-	delete[] v;
-    
+	
 }
 

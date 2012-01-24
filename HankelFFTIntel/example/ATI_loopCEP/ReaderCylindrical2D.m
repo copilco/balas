@@ -2,14 +2,14 @@
 
 clear all
 ax = importdata('axis.txt');
-%A0 = importdata('out0.txt');
+A0 = importdata('out0.txt');
 A1 = importdata('out1.txt');
 
 %% 
-nr = 100%A3(1);
-nz = 50%A3(2);
+nr = 520%A3(1);
+nz = 680%A3(2);
 
-Ntime = 2500%A3(3);
+Ntime = 200%A3(3);
 snap  = 20%A3(4);%1;%
 
 Nsnap = length(A1)/nr/nz;
@@ -21,7 +21,6 @@ z = ax(nr+1:nz+nr);
 
 r0=0;
 
-
 %% 
 
 xmin = 0;
@@ -29,19 +28,12 @@ xmax = 24;
 ymin =-15;
 ymax = 15;
 
-scrsz = get(0,'ScreenSize');
-figure('Position',[1 scrsz(4)/2 scrsz(3)/1.7 scrsz(4)/1.7],...
-    'Color','w');
-
-
-
 for j=1:Nsnap
+    %clf
     
-    clf
-    
-    %scrsz = get(0,'ScreenSize');
-    %figure('Position',[1 scrsz(4)/2 scrsz(3)/1.7 scrsz(4)/1.7],...
-    %    'Color','w');
+    scrsz = get(0,'ScreenSize');
+    figure('Position',[1 scrsz(4)/2 scrsz(3)/1.7 scrsz(4)/1.7],...
+        'Color','w');
     
     
     PHI=reshape(A1(1+nr*nz*(j-1):nr*nz*j),nz,nr);
@@ -81,7 +73,7 @@ for j=1:Nsnap
   %  F = getframe(fig);
   %  aviobj = addframe(aviobj,F); 
 %end 
-    pause(0.2)
+    pause(0.1)
  %   display(j);
 end    
     
