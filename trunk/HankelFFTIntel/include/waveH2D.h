@@ -1,12 +1,11 @@
-/*
- *  wave.h
- *  
- *
- *  Created by Camilo Ruiz Méndez on 29/11/11.
- *  Copyright 2011 USAL. All rights reserved.
- *
- */
-
+//
+//  wave.h
+//  
+//
+//  Created by Camilo Ruiz Méndez on 29/11/11.
+//  
+//
+//
 #ifndef WAVE_H
 #define WAVE_H
 
@@ -24,13 +23,15 @@ public:
 	int Nr,Nz;
 	int space_indicator;  //Defines in which space you are.
 	double *r, *dr;
+	double rho0, z0;
 	double *v, *dv, *kr, *dkr;
 	double *z,dz,*q,dq,qmax;
 
 	complex *F,*phi;
 	complex *G,*phik;
-	double *pot;
 	
+	double *pot;
+
 	complex *rv,*phil;
 	complex *rv_z;
 	complex *phi_z;
@@ -60,7 +61,7 @@ public:
 		dz=_dz;
 		
 		
-		//space_indicator=0;//We are in position rho space
+		//space_indicator=0; // We are in position rho space
 		
 		
 		phi=new complex[Nr*Nz];		
@@ -97,9 +98,9 @@ public:
 		gamz=    new complex[Nz];	
 		
 		
-		/***********************************************************/	
-		//Fill the arrays with zeros.
-		/***********************************************************/
+		/*******************************/	
+		//  Fill the arrays with zeros //
+		/*******************************/
 		
 		for(int i=0;i<Nr*Nz;i++)
 		{
@@ -113,9 +114,9 @@ public:
 			
 		}
 		
-		/***********************************************************/	
-		//Fill the grids onto the wavefunction
-		/***********************************************************/
+		/*****************************************/	
+		// Fill the grids onto the wavefunction  //
+		/*****************************************/
 		
 		for(int i=0;i<Nr;i++)
 		{
@@ -155,9 +156,9 @@ public:
 		status = DftiCommitDescriptor(hand);
 
 
-		/***********************************************************/	
-		//Preparing the arrays fof the Crank
-		/***********************************************************/
+		/****************************/	
+		//  Defining Crank arrays   //
+		/****************************/
 		
 		
 		//Evaluation of diagonal up and diagonal down
@@ -183,9 +184,23 @@ public:
 		
 	}
 	
-	/***********************************************************/	
-	//Norms in both spaces
-	/***********************************************************/	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	/****************************************/	
+	//   Set potencial of the hamiltonian   //
+	/****************************************/
+	
+	void set_potencial_hlike1D(double charge_nuclei=1., double soft_core=2.)
+	{
+		for(int j=0; j<Nr; j++)
+			for (int i=0; i<Nz; i++)
+				pot[index(j,i)]=charge_nuclei*charge_electron_au/sqrt(soft_core+(r[j]-rho0)*(r[j]-rho0)+(z[i]-z0)*(z[i]-z0));
+	
+	}
+	
+	/***************************/	
+	//   Norms in both spaces  //
+	/***************************/	
 	
 	
 	double norm()
@@ -232,9 +247,9 @@ public:
 	
 	}
 	
-	/***********************************************************/	
-	// Scaling the axis
-	/***********************************************************/	
+	/*********************/	
+	// Scaling the axis  //
+	/*********************/	
 	
 	
 	void phi2F(HankelMatrix &HH)
@@ -270,9 +285,9 @@ public:
 		
 	}
 	
-	/***********************************************************/	
-	//Hankel Transforms.
-	/***********************************************************/	
+	/*************************/	
+	//  Hankel Transforms    //
+	/*************************/	
 	
 	
 	void HankelTransform(HankelMatrix &HH)
@@ -303,23 +318,56 @@ public:
 			status=DftiComputeBackward(hand,&phi[j*Nz]);
 	}
 	
-	void PropKinHFFT(double dt)
+	
+	
+	/***************/	
+	// Propagators //
+	/***************/
+	
+	void prop_kinetic(HankelMatrix &HH, complex dt,double vec_pot1=0.0, double vec_pot2=0.0)
 	{
-		double fase=0.;
+		
+		complex fase=complex(0.,0.);
+		
+		
+		FFTFor();        
+		phi2F(HH);
+		HankelTransform(HH);
+		
+		
 		for(int j=0;j<Nr;j++)
 			for(int i=0;i<Nz;i++)
 			{
-				fase=dospi*dospi*q[i]*q[i]*dt/2.;
-				phi[index(j,i)]*=exp(I*fase);
+				fase=1./2.*(dospi*v[j]+charge_electron_au*vec_pot2/lightC_au)*(dospi*v[j]+charge_electron_au*vec_pot2/lightC_au)*dt+1./2.*(q[i]+charge_electron_au*vec_pot1/lightC_au)*(q[i]+charge_electron_au*vec_pot1/lightC_au)*dt;
+				G[index(j,i)]*=exp(-I*fase);
 			}
+		
+		
+		HankelTransformBack(HH);
+		F2phi(HH);
+		FFTBack();       
+		
 		
 	}
 	
+	void prop_potencial(complex &dt)
+	{
+		
+		complex fase=complex(0.,0.);
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+			{
+				fase=1./2.*pot[index(j,i)]*dt;
+				phi[index(j,i)]*=exp(-I*fase);
+			}
+		
+		
+	}
 	
-	
-	/***********************************************************/	
-	//Preparing the arrays fof the Crank
-	/***********************************************************/
+	/***************************************/	
+	// Preparing the arrays for the Crank  //
+	/***************************************/
 	
 	void PrepareCrankArrays(double dt)
 	{
@@ -537,11 +585,11 @@ public:
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	///////////////////////////////////////////////
-    //  Operators in Schrödinger representation  //
-    ///////////////////////////////////////////////
+	/***********************************************/	
+	//   Operators in Schrödinger representation   //
+	/***********************************************/
 	
-	
+
 	double expectedZ()
 	{
 		double zExpected=0.0;
@@ -595,7 +643,7 @@ public:
 	}
 	
 	
-	double pot_energy(double *pot)
+	double pot_energy()
 	{
 		double potE=0.;
 		
@@ -609,7 +657,97 @@ public:
 	}
 	
 	
+	/****************************/	
+	//   Utility functions      //
+	/****************************/
+	
+	void mask_function2D(waveH2D &mom_w,const double &x0,const double &x1,const double &sigma)
+	{
 		
+		double x;
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+			{
+				x = sqrt( (r[j]-rho0) * (r[j]-rho0) + (z[i]-z0) * (z[i]-z0) );
+				
+				if(x<=x0)
+					mom_w.phi[index(j,i)]*=0.;
+				
+				if(x>x0 && x<=x1)
+					mom_w.phi[index(j,i)]=phi[index(j,i)]*(1.-exp(-(x-x0)*(x-x0)/16.));
+				
+				if(x>x1)
+					mom_w.phi[index(j,i)]=phi[index(j,i)];
+				
+			}
+		
+	}
+	
+	
+	void saveAxes(fstream &file)
+	{
+		for(int j=0;j<Nr;j++)
+			file << r[j] << endl;
+		
+		for(int j=0;j<Nz;j++)
+			file << z[j] << endl;
+	}
+
+
+	
+	void saveQAxes(fstream &file)
+	{
+		for(int j=0;j<Nr;j++)
+			file << dospi*v[j] << endl;
+		
+		for(int j=0;j<Nz;j++)
+			file << q[j] << endl;
+	}
+
+	
+	void snapshot(fstream &file,int skiper1=1,int skiper2=1)
+	{
+		
+		double norm=0.0;
+		
+		for(int j=0;j<Nr/skiper2;j++)
+			for(int i=0;i<Nz/skiper1;i++)
+			{
+				norm=dz*dr[j]*r[j]*real(conj(phi[index(j*skiper2,i*skiper1)])*phi[index(j*skiper2,i*skiper1)]);
+				file << norm << endl;
+			}
+		
+	}
+	
+	void qsnapshot(fstream &file,HankelMatrix &HH,int skiper1=1,int skiper2=1)
+	{
+		double qnorm=0.0;
+		
+		FFTFor();
+		phi2F(HH);
+		HankelTransform(HH);
+		G2phik(HH);
+		
+		for(int j=0;j<Nr/skiper2;j++)
+			for(int i=0;i<Nz/skiper1;i++)
+			{
+				qnorm=dq*dv[j]*v[j]*real(conj(phik[index(j*skiper2,i*skiper1)])*phik[index(j*skiper2,i*skiper1)]);
+				file << qnorm << endl;
+			}
+		
+		phik2G(HH);
+		HankelTransformBack(HH);
+		F2phi(HH);
+		FFTBack();
+
+	}
+	
+	/**************************************************************************************************************/	
+	//                                                                                                            //
+	/**************************************************************************************************************/
+	
+	
 };
 
 #endif // TOOLS_H

@@ -41,7 +41,6 @@ int main()
     double dr=0.1;
     double absdt=0.1;
     
-    double *v = new double[Nr*Nz];
     double echarge=-1.;
     double soft_core=2.;
     
@@ -98,7 +97,7 @@ int main()
 			
 			
 			//Set potential
-			v[w.index(j,i)]=-1./sqrt(soft_core+(w.r[j]-rho0)*(w.r[j]-rho0)+(w.z[i]-z0)*(w.z[i]-z0));
+			w.pot[w.index(j,i)]=-1./sqrt(soft_core+(w.r[j]-rho0)*(w.r[j]-rho0)+(w.z[i]-z0)*(w.z[i]-z0));
 		}
     
     
@@ -177,7 +176,7 @@ int main()
 		for(int j=0;j<Nr;j++)
 			for(int i=0;i<Nz;i++)
 			{
-				fase=v[w.index(j,i)]*dt/2.;
+				fase=w.pot[w.index(j,i)]*dt/2.;
 				w.phi[w.index(j,i)]*=exp(-I*fase);
 			}
 		
@@ -207,13 +206,19 @@ int main()
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+		/*
+		w.prop_kinetic(HH,dt/2.);
+		w.prop_potencial(dt);
+		w.prop_kinetic(HH,dt/2.);
+		*/
+		
 		w.normalize();
 		
 		//cout << "Norm in frequency space: " << w.qnorm(HH) << endl;
 		
-		ene1 = w.kinetic_energy(HH)+w.pot_energy(v);
+		ene1 = w.kinetic_energy(HH)+w.pot_energy();
 		
-		cout << "Energy (Expected value):  " << ene1 << "Error: " << log10(abs(ene1-ene2)) << endl;
+		cout << "Energy (Expected value):  " << ene1 << "   Error: " << log10(abs(ene1-ene2)) << endl;
 		cout << "Norm after Transform  " << w.norm() << endl;
 		
 		outEne << ene1 << "  " << log10(abs(ene1-ene2)) << endl;
@@ -241,7 +246,6 @@ int main()
     out1.close();
     outEne.close();
 	
-    delete[] v;
     
 }
 
