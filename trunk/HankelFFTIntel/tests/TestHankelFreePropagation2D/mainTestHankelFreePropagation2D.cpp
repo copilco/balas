@@ -5,7 +5,6 @@
 //  Created by de la Calle Negro Alejandro on 18/12/11.
 //  
 //
-
 #include <iostream>
 #include <fstream>
 #include <math.h>
@@ -34,25 +33,25 @@ int main()
     //  Parameters  //
     //////////////////
     
-    int Nr=520;
-    int Nz=680;
+    int Nr=250;//520;
+    int Nz=500;//680;
     
-    double dz=0.1;
-	double dr=0.1;
-    double dt=0.01;
+    double dz=0.3;
+	double dr=0.3;
+    double dt=0.1;
     
-    int Ntime=200;
-    int snap=30;
+    int Ntime=100;
+    int snap=20;
     
     //Gaussian parameters
     
 	double Rmax  = ceil(Nr*dr);
-    double rho0  = Rmax/2.;
+    double rho0  = 0.;//Rmax/2.;
 	double rho00 = 12.;
 	double z0    = 0.;		
 	double v0r   = 0.;//5.;
 	double v0z   = 0.0;	
-	double sigma = 1.;
+	double sigma = 4.;
     
     // Print out the information on the screen
         
@@ -89,7 +88,7 @@ int main()
 		for (int i=0; i<Nz; i++)
         {
 			//w.phi[w.index(j,i)]=exp(-(w.r[j]-rho0)*(w.r[j]-rho0)/sigma/sigma-(w.z[i]*w.z[i])/sigma/sigma);
-			w.phi[w.index(j,i)]= w.r[j]*exp(  -(w.r[j] - rho0)*(w.r[j] - rho0)/sigma/sigma -(w.z[i] - z0)*(w.z[i] - z0)/sigma/sigma )*exp(I* (v0r*(w.r[j] - rho0) + v0z*(w.z[i] - z0))  );
+			w.phi[w.index(j,i)]= exp(  -(w.r[j] - rho0)*(w.r[j] - rho0)/sigma/sigma -(w.z[i] - z0)*(w.z[i] - z0)/sigma/sigma )*exp(I* (v0r*(w.r[j] - rho0) + v0z*(w.z[i] - z0))  );
 			
 			//if (w.r[j]>=rho00*0.)
 				//v[w.index(j,i)]=-100.0/sqrt(1.+(w.r[j]-rho00)*(w.r[j]-rho00)+(w.z[i] - 2.*z0)*(w.z[i] - 2.*z0) )*1.;
@@ -171,7 +170,7 @@ int main()
         /////////////////////////
 		
 		
-		w.absorber(0.1,0.1,0.1,0.1,1./6.);
+		//w.absorber(0.1,0.1,0.1,0.1,1./6.);
 	
 	
     }
