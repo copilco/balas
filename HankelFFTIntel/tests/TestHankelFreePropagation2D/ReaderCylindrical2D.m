@@ -6,10 +6,11 @@ A0 = importdata('out0.txt');
 A1 = importdata('out1.txt');
 
 %% 
-nr = 520%A3(1);
-nz = 680%A3(2);
 
-Ntime = 200%A3(3);
+nr = 250%520;%A3(1);
+nz = 500%680;%A3(2);
+
+Ntime = 100%A3(3);
 snap  = 20%A3(4);%1;%
 
 Nsnap = snap;%floor(Ntime/snap);
@@ -41,7 +42,7 @@ for j=1:Nsnap
     
     %for jmovie=1:3
     % subplot(5,3,j)
-    surfc(R,Z,log10(PHI+1e-8),...
+    surfc(R,Z,log10(PHI+1e-15),...
         'FaceColor','interp',...
         'EdgeColor','none')
     

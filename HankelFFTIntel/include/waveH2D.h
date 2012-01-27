@@ -575,8 +575,8 @@ public:
 				
 				if (j> int(Nr*(1.-frac_r_right)))
 				{		  
-					phi[index(j,i)].real()*=mask_r_left;	
-					phi[index(j,i)].imag()*=mask_r_left;	
+					phi[index(j,i)].real()*=mask_r_right;	
+					phi[index(j,i)].imag()*=mask_r_right;	
 				}
 				
 			}//End the loop on ij
@@ -654,6 +654,19 @@ public:
 		
 		return potE;
 		
+	}
+	
+	
+	double projection(waveH2D &wave1)
+	{
+		double proj = 0.0;
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+				proj+=dz*dr[j]*r[j]*abs(conj(wave1.phi[index(j,i)])*phi[index(j,i)]);
+		
+		
+		return proj;
 	}
 	
 	
@@ -742,6 +755,19 @@ public:
 		FFTBack();
 
 	}
+	
+	/*
+	void SaveGroundState()
+	{
+		fstream file("GroundState.bin", ios::out | ios::binary);
+		
+		file.write((char*)&phi[0].real(), sizeof(double)*(Nr*Nz) );
+		
+		file.close();
+		
+		
+	}
+	*/
 	
 	/**************************************************************************************************************/	
 	//                                                                                                            //

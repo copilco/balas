@@ -3,11 +3,11 @@
 clear all
 ax = importdata('axis.txt');
 %A0 = importdata('out0.txt');
-A1 = importdata('out1.txt');
+A1 = importdata('out2.txt');
 
 %% 
-nr = 100%A3(1);
-nz = 50%A3(2);
+nr = 200%A3(1);
+nz = 400%A3(2);
 
 Ntime = 2500%A3(3);
 snap  = 20%A3(4);%1;%
@@ -48,9 +48,10 @@ for j=1:Nsnap
     
     %for jmovie=1:3
     % subplot(5,3,j)
-    surfc(R,Z,log10(PHI+1e-8),...
+    surfc(R,Z,log10(PHI+1e-12),...
         'FaceColor','interp',...
         'EdgeColor','none')
+    daspect([1 1 1])
     
     view(2)
     axis tight
