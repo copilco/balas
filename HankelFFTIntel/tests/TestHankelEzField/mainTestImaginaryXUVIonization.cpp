@@ -36,11 +36,11 @@ int main()
     //  Parameters  //
     //////////////////
     
-    int Nr=300;
-    int Nz=400;
+    int Nr=3000;
+    int Nz=2000;
     
     double dz=0.3;
-    double dr=0.1;
+    //double dr=0.1;
     double absdt=0.05;
     complex t;
 	
@@ -66,7 +66,7 @@ int main()
     
     //Gaussian parameters
     
-    double Rmax  = 40;//ceil(Nr*dr);
+    double Rmax  = 200;//ceil(Nr*dr);
     double rho0  = 0.;//Rmax/2.;
     double rho00 = 0.;//12.;
     double z0    = 0.;		

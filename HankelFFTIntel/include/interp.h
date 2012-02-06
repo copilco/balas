@@ -41,12 +41,11 @@ void interpH2U(waveH2D &wHank, waveUniform2D &wU)
     DFTaskPtr taskReal;                     // Data Fitting task descriptor
     DFTaskPtr taskImag; 
     DFTaskPtr celltask;
-    double *auxInReal = new double[Nr*Nz];        // Auxiliary arrays
-    double *auxInImag = new double[Nr*Nz];
-    double *auxOutReal = new double[Nr*Nz];
-    double *auxOutImag = new double[Nr*Nz];
+    double *auxInReal = new double[Nr];        // Auxiliary arrays
+    double *auxInImag = new double[Nr];
+    double *auxOutReal = new double[Nr];
+    double *auxOutImag = new double[Nr];
     MKL_INT *cells = new MKL_INT[wU.Nr];
-    double *sites = new double[2];
     double *scoeffReal;
 	double *scoeffImag;
 	
@@ -65,7 +64,7 @@ void interpH2U(waveH2D &wHank, waveUniform2D &wU)
     
     
     ////// Parameters describing function //////
-    MKL_INT ny = Nz;                      // number of functions
+    MKL_INT ny = 1;                      // number of functions
     MKL_INT yhint = DF_NO_HINT;                      // additional info about function
     
     
@@ -91,10 +90,7 @@ void interpH2U(waveH2D &wHank, waveUniform2D &wU)
     ////// Parameters describing interpolation sites //////
     
     MKL_INT nsite = Nr;                      // number of interpolation sites
-    MKL_INT sitehint = DF_UNIFORM_PARTITION;    // additional info about interpolation sites
-    
-    sites[0]=wU.r[0];
-    sites[1]=wU.r[wU.Nr-1];
+    MKL_INT sitehint = DF_NON_UNIFORM_PARTITION;    // additional info about interpolation sites
     
     
     ////// Additional info about structure of arrays x and y //////
@@ -128,7 +124,7 @@ void interpH2U(waveH2D &wHank, waveUniform2D &wU)
     errcode = dfdNewTask1D( &celltask, nx, wHank.r, xhint, 0, 0, 0 );
     CheckDfError(errcode);
     
-    errcode = dfdSearchCells1D( celltask, DF_METHOD_STD, nsite, sites,
+    errcode = dfdSearchCells1D( celltask, DF_METHOD_STD, nsite, wU.r,
                                sitehint, datahint, cell_idx);
     CheckDfError(errcode);
     
@@ -145,85 +141,88 @@ void interpH2U(waveH2D &wHank, waveUniform2D &wU)
 	// Create the interpolant //
 	////////////////////////////
     
-    for(int j=0;j<Nr;j++)
-        for(int i=0;i<Nz;i++)
-        {
-            auxInReal[wHank.index(i,j)]=wHank.phi[wHank.index(i,j)].real();
-            auxInImag[wHank.index(i,j)]=wHank.phi[wHank.index(i,j)].imag();
-        }
-    
-	
-    ////// Create Data Fitting task //////
-    errcode = dfdNewTask1D(&taskReal, nx, wHank.r, xhint, ny, auxInReal, yhint );
-    CheckDfError(errcode);
-    
-    errcode = dfdNewTask1D(&taskImag, nx, wHank.r, xhint, ny, auxInImag, yhint );
-    CheckDfError(errcode);
-    
-    
-    ////// Edit task parameters for Hermite cubic spline construction //////
-    errcode = dfdEditPPSpline1D( taskReal, sorder, stype, bc_type, 0,
-                                ic_type, 0, scoeffReal, scoeffhint );
-    CheckDfError(errcode);
-    
-    errcode = dfdEditPPSpline1D( taskImag, sorder, stype, bc_type, 0,
-								ic_type, 0, scoeffImag, scoeffhint );
-    CheckDfError(errcode);
-	
-    ////// Construct Natural cubic spline using STD method //////
-    errcode = dfdConstruct1D( taskReal, DF_PP_SPLINE, DF_METHOD_STD );
-    CheckDfError(errcode);
-    
-    errcode = dfdConstruct1D( taskImag, DF_PP_SPLINE, DF_METHOD_STD );
-    CheckDfError(errcode);
-    
-    
-    
-    ////////////////////////////
-    // Evaluate the polynom   //
-    ////////////////////////////
-    
-    ////// Interpolate using PP method //////
-    errcode = dfdInterpolate1D( taskReal, DF_INTERP, DF_METHOD_PP,
-                               nsite, sites, sitehint, ndorder,
-                               dorder, datahint, auxOutReal, rhint, cell_idx );
-    CheckDfError(errcode);
-	
-    
-    errcode = dfdInterpolate1D( taskImag, DF_INTERP, DF_METHOD_PP,
-                               nsite, sites, sitehint, ndorder,
-                               dorder, datahint, auxOutImag, rhint, cell_idx );
-    CheckDfError(errcode);
-    
-    for(int j=0;j<Nr;j++)
-        for(int i=0;i<Nz;i++)
-        {
-            wU.phi[wU.index(i,j)].real()=auxOutReal[wU.index(i,j)];
-            wU.phi[wU.index(i,j)].imag()=auxOutImag[wU.index(i,j)];
-        }
-    
-    
-    ////// Delete Data Fitting task //////
-    errcode = dfDeleteTask( &taskReal );
-    CheckDfError(errcode);
-    
-    errcode = dfDeleteTask( &taskImag );
-    CheckDfError(errcode);
-    
-    
-    
-    ///////////////////////////
+	for(int i=0;i<Nz;i++)
+	{
+		
+		for(int j=0;j<Nr;j++)
+		{
+			auxInReal[j]=wHank.phi[wHank.index(j,i)].real();
+			auxInImag[j]=wHank.phi[wHank.index(j,i)].imag();
+		}
+		
+		
+		////// Create Data Fitting task //////
+		errcode = dfdNewTask1D(&taskReal, nx, wHank.r, xhint, ny, auxInReal, yhint );
+		CheckDfError(errcode);
+		
+		errcode = dfdNewTask1D(&taskImag, nx, wHank.r, xhint, ny, auxInImag, yhint );
+		CheckDfError(errcode);
+		
+		
+		////// Edit task parameters for Hermite cubic spline construction //////
+		errcode = dfdEditPPSpline1D( taskReal, sorder, stype, bc_type, 0,
+									ic_type, 0, scoeffReal, scoeffhint );
+		CheckDfError(errcode);
+		
+		errcode = dfdEditPPSpline1D( taskImag, sorder, stype, bc_type, 0,
+									ic_type, 0, scoeffImag, scoeffhint );
+		CheckDfError(errcode);
+		
+		////// Construct Natural cubic spline using STD method //////
+		errcode = dfdConstruct1D( taskReal, DF_PP_SPLINE, DF_METHOD_STD );
+		CheckDfError(errcode);
+		
+		errcode = dfdConstruct1D( taskImag, DF_PP_SPLINE, DF_METHOD_STD );
+		CheckDfError(errcode);
+		
+		
+		
+		////////////////////////////
+		// Evaluate the polynom   //
+		////////////////////////////
+		
+		////// Interpolate using PP method //////
+		errcode = dfdInterpolate1D( taskReal, DF_INTERP, DF_METHOD_PP,
+								   nsite, wU.r, sitehint, ndorder,
+								   dorder, datahint, auxOutReal, rhint, cell_idx );
+		CheckDfError(errcode);
+		
+		
+		errcode = dfdInterpolate1D( taskImag, DF_INTERP, DF_METHOD_PP,
+								   nsite, wU.r, sitehint, ndorder,
+								   dorder, datahint, auxOutImag, rhint, cell_idx );
+		CheckDfError(errcode);
+		
+		
+		for(int j=0;j<Nr;j++)
+		{
+			wU.phi[wU.index(j,i)].real()=auxOutReal[j];
+			wU.phi[wU.index(j,i)].imag()=auxOutImag[j];
+		}
+		
+		
+		////// Delete Data Fitting task //////
+		errcode = dfDeleteTask( &taskReal );
+		CheckDfError(errcode);
+		
+		errcode = dfDeleteTask( &taskImag );
+		CheckDfError(errcode);
+		
+		
+	}
+
+	///////////////////////////
 	// Free auxiliary arrays //
 	///////////////////////////
-    
-    delete[] auxInReal, auxInImag, auxOutReal, auxOutImag;
-    delete[] scoeffReal, scoeffImag;
-    delete[] sites, cells;
-    
+	
+	delete[] auxInReal, auxInImag, auxOutReal, auxOutImag;
+	delete[] scoeffReal, scoeffImag;
+	delete[] cells;
+	
 }
 
-
-
+	
+	
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -240,12 +239,11 @@ void interpU2H(waveUniform2D &wU, waveH2D &wHank)
     DFTaskPtr taskReal;                     // Data Fitting task descriptor
     DFTaskPtr taskImag; 
     DFTaskPtr celltask;
-    double *auxInReal = new double[Nr*Nz];        // Auxiliary arrays
-    double *auxInImag = new double[Nr*Nz];
-    double *auxOutReal = new double[Nr*Nz];
-    double *auxOutImag = new double[Nr*Nz];
+    double *auxInReal = new double[Nr];        // Auxiliary arrays
+    double *auxInImag = new double[Nr];
+    double *auxOutReal = new double[Nr];
+    double *auxOutImag = new double[Nr];
     MKL_INT *cells = new MKL_INT[wU.Nr];
-    double *x_idx = new double[2];
     double *scoeffReal;
 	double *scoeffImag;
     
@@ -260,13 +258,10 @@ void interpU2H(waveUniform2D &wU, waveH2D &wHank)
     ///// Parameters describing interpolation interval //////
     
     MKL_INT nx = Nr;                           // number of break points
-    MKL_INT xhint = DF_UNIFORM_PARTITION;                  // additional info about break points
-    
-    x_idx[0]=wU.r[0];
-    x_idx[1]=wU.r[Nr-1];
+    MKL_INT xhint = DF_NON_UNIFORM_PARTITION;                  // additional info about break points
     
     ////// Parameters describing function //////
-    MKL_INT ny = Nz;                      // number of functions
+    MKL_INT ny = 1;                      // number of functions
     MKL_INT yhint = DF_NO_HINT;                      // additional info about function
     
     
@@ -322,7 +317,7 @@ void interpU2H(waveUniform2D &wU, waveH2D &wHank)
     
     ////// Create cell search task //////
     
-    errcode = dfdNewTask1D( &celltask, nx, x_idx, xhint, 0, 0, 0 );
+    errcode = dfdNewTask1D( &celltask, nx, wU.r, xhint, 0, 0, 0 );
     CheckDfError(errcode);
     
     errcode = dfdSearchCells1D( celltask, DF_METHOD_STD, nsite, wHank.r,
@@ -342,79 +337,83 @@ void interpU2H(waveUniform2D &wU, waveH2D &wHank)
 	// Create the interpolant //
 	////////////////////////////
     
-    for(int i=0;i<Nz;i++)
+	
+	for(int i=0;i<Nz;i++)
+	{
+		
+		
         for(int j=0;j<Nr;j++)
         {
-            auxInReal[wU.index(i,j)]=wU.phi[wU.index(i,j)].real();
-            auxInImag[wU.index(i,j)]=wU.phi[wU.index(i,j)].imag();
+            auxInReal[j]=wU.phi[wU.index(j,i)].real();
+            auxInImag[j]=wU.phi[wU.index(j,i)].imag();
         }
-	
+		
+		
+		////// Create Data Fitting task //////
+		errcode = dfdNewTask1D(&taskReal, nx, wU.r, xhint, ny, auxInReal, yhint );
+		CheckDfError(errcode);
+		
+		errcode = dfdNewTask1D(&taskImag, nx, wU.r, xhint, ny, auxInImag, yhint );
+		CheckDfError(errcode);
+		
+		
+		////// Edit task parameters for Hermite cubic spline construction //////
+		errcode = dfdEditPPSpline1D( taskReal, sorder, stype, bc_type, 0,
+									ic_type, 0, scoeffReal, scoeffhint );
+		CheckDfError(errcode);
+		
+		errcode = dfdEditPPSpline1D( taskImag, sorder, stype, bc_type, 0,
+									ic_type, 0, scoeffImag, scoeffhint );
+		CheckDfError(errcode);
     
-    ////// Create Data Fitting task //////
-    errcode = dfdNewTask1D(&taskReal, nx, x_idx, xhint, ny, auxInReal, yhint );
-    CheckDfError(errcode);
-    
-    errcode = dfdNewTask1D(&taskImag, nx, x_idx, xhint, ny, auxInImag, yhint );
-    CheckDfError(errcode);
-    
-    
-    ////// Edit task parameters for Hermite cubic spline construction //////
-    errcode = dfdEditPPSpline1D( taskReal, sorder, stype, bc_type, 0,
-                                ic_type, 0, scoeffReal, scoeffhint );
-    CheckDfError(errcode);
-    
-    errcode = dfdEditPPSpline1D( taskImag, sorder, stype, bc_type, 0,
-                                ic_type, 0, scoeffImag, scoeffhint );
-    CheckDfError(errcode);
-    
-    ////// Construct Natural cubic spline using STD method //////
-    errcode = dfdConstruct1D( taskReal, DF_PP_SPLINE, DF_METHOD_STD );
-    CheckDfError(errcode);
-    
-    errcode = dfdConstruct1D( taskImag, DF_PP_SPLINE, DF_METHOD_STD );
-    CheckDfError(errcode);
-    
-    
-    
-    ////////////////////////////
-    // Evaluate the polynom   //
-    ////////////////////////////
-    
-    ////// Interpolate using PP method //////
-    errcode = dfdInterpolate1D( taskReal, DF_INTERP, DF_METHOD_PP,
-                               nsite, wHank.r, sitehint, ndorder,
-                               dorder, datahint, auxOutReal, rhint, cell_idx );
-    CheckDfError(errcode);
-    
-    
-    errcode = dfdInterpolate1D( taskImag, DF_INTERP, DF_METHOD_PP,
-                               nsite, wHank.r, sitehint, ndorder,
-                               dorder, datahint, auxOutImag, rhint, cell_idx );
-    CheckDfError(errcode);
-    
-    for(int i=0;i<Nz;i++)
+		////// Construct Natural cubic spline using STD method //////
+		errcode = dfdConstruct1D( taskReal, DF_PP_SPLINE, DF_METHOD_STD );
+		CheckDfError(errcode);
+		
+		errcode = dfdConstruct1D( taskImag, DF_PP_SPLINE, DF_METHOD_STD );
+		CheckDfError(errcode);
+		
+		
+		
+		////////////////////////////
+		// Evaluate the polynom   //
+		////////////////////////////
+		
+		////// Interpolate using PP method //////
+		errcode = dfdInterpolate1D( taskReal, DF_INTERP, DF_METHOD_PP,
+								   nsite, wHank.r, sitehint, ndorder,
+								   dorder, datahint, auxOutReal, rhint, cell_idx );
+		CheckDfError(errcode);
+		
+		
+		errcode = dfdInterpolate1D( taskImag, DF_INTERP, DF_METHOD_PP,
+								   nsite, wHank.r, sitehint, ndorder,
+								   dorder, datahint, auxOutImag, rhint, cell_idx );
+		CheckDfError(errcode);
+		
+		
         for(int j=0;j<Nr;j++)
         {
-            wHank.phi[wHank.index(i,j)].real()=auxOutReal[wHank.index(i,j)];
-            wHank.phi[wHank.index(i,j)].imag()=auxOutImag[wHank.index(i,j)];
+            wHank.phi[wHank.index(j,i)].real()=auxOutReal[j];
+            wHank.phi[wHank.index(j,i)].imag()=auxOutImag[j];
         }   
-	
-    
-    ////// Delete Data Fitting task //////
-    errcode = dfDeleteTask( &taskReal );
-    CheckDfError(errcode);
-    
-    errcode = dfDeleteTask( &taskImag );
-    CheckDfError(errcode);
-    
-    
+		
+		
+		////// Delete Data Fitting task //////
+		errcode = dfDeleteTask( &taskReal );
+		CheckDfError(errcode);
+		
+		errcode = dfDeleteTask( &taskImag );
+		CheckDfError(errcode);
+		
+    }
     
     ///////////////////////////
 	// Free auxiliary arrays //
 	///////////////////////////
     
     delete[] auxInReal, auxInImag, auxOutReal, auxOutImag;
-    delete[] x_idx, cells;
+    delete[] cells;
 	delete[] scoeffReal, scoeffImag;
 	
     

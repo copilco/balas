@@ -36,8 +36,8 @@ int main()
     //  Parameters  //
     //////////////////
     
-    int Nr=520;
-    int Nz=680;
+    int Nr=1000;
+    int Nz=2000;
     
     double dz=.2;
     double dr=0.1;
@@ -51,13 +51,13 @@ int main()
     
     //Gaussian parameters
     
-    double Rmax  = 50;//ceil(Nr*dr);
-    double rho0  = Rmax/2.;
+    double Rmax  = 150;//ceil(Nr*dr);
+    double rho0  = 0.;//Rmax/2.;
     double rho00 = 0.;//12.;
     double z0    = 0.;		
     double v0r   = 0.;//5.;
     double v0z   = 0.0;	
-    double sigma = .5;
+    double sigma = 20.;
     
     // Print out the information on the screen
     
@@ -94,9 +94,7 @@ int main()
     for(int j=0; j<Nr; j++)
 		for (int i=0; i<Nz; i++)
         {
-			//w.phi[w.index(i,j)]=exp(-(w.r[j]-rho0)*(w.r[j]-rho0)/sigma/sigma-(w.z[i]*w.z[i])/sigma/sigma);
-			w.phi[w.index(j,i)]= w.r[j]*exp(  -(w.r[j] - rho0)*(w.r[j] - rho0)/sigma/sigma -(w.z[i] - z0)*(w.z[i] - z0)/sigma/sigma );//*exp(I* (v0r*(w.r[j] - rho0) + v0z*(w.z[i] - z0))  );
-			
+			w.phi[w.index(j,i)]= exp(  -(w.r[j] - rho0)*(w.r[j] - rho0)/sigma/sigma -(w.z[i] - z0)*(w.z[i] - z0)/sigma/sigma );//*exp(I* (v0r*(w.r[j] - rho0) + v0z*(w.z[i] - z0))  );
 			
 			//Set potential
 			w.pot[w.index(j,i)]=-1./sqrt(soft_core+(w.r[j]-rho0)*(w.r[j]-rho0)+(w.z[i]-z0)*(w.z[i]-z0));
@@ -125,7 +123,7 @@ int main()
 			out0 << abs(conj(w.phi[w.index(j,i)])*w.phi[w.index(j,i)])*w.r[j] << endl;
     
 	
-	w.SaveGroundState();
+	//w.SaveGroundState();
 	
     
     //////////////////////////////////////
@@ -140,7 +138,7 @@ int main()
 	double ene1 = 0.;
 	double ene2 = 0.;
 	
-    for (int ktime=0; ktime<0*Ntime; ktime++)
+    for (int ktime=0; ktime<Ntime; ktime++)
 	{
 		
         cout << "Loop number: " << ktime << endl;
@@ -233,12 +231,12 @@ int main()
 		////////////////////////////////////////////
 		// Take the snapshot of the wavefunction  //
 		////////////////////////////////////////////
-		
+		/*
 		if(ktime%(Ntime/(snap-1)) == 0)
 			for(int j=0;j<Nr;j++)
 				for(int i=0;i<Nz;i++)
 					out1 << abs(conj(w.phi[w.index(j,i)])*w.phi[w.index(j,i)])*w.r[j] << endl;	
-		
+		*/
 	}
 	
 	
@@ -266,7 +264,7 @@ int main()
 	dt=complex(absdt,0.);
 	
 	
-	for (int ktime=0; ktime<0*Ntime; ktime++)
+	for (int ktime=0; ktime<Ntime; ktime++)
 	{
 		cout << "Loop number: " << ktime << endl;
 		
@@ -279,12 +277,12 @@ int main()
 		////////////////////////////////////////////
 		// Take the snapshot of the wavefunction  //
 		////////////////////////////////////////////
-		
+		/*
 		if(ktime%(Ntime/(snap-1)) == 0)
 			for(int j=0;j<Nr;j++)
 				for(int i=0;i<Nz;i++)
 					out2 << abs(conj(wClone.phi[w.index(j,i)])*wClone.phi[w.index(j,i)])*wClone.r[j] << endl;	
-		
+		*/
 		
 		
 		// Projection of the two wavefunctions 
