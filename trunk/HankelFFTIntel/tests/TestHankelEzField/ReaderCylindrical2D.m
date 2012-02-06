@@ -3,11 +3,18 @@
 clear all
 ax = importdata('axis.txt');
 %A0 = importdata('out0.txt');
-A1 = importdata('out2.txt');
+%A1 = importdata('out2.txt');
+
+
+fid = fopen('out2.txt');
+A = textscan(fid,'%n');
+fclose(fid);
+
+A1 = cell2mat(A);
 
 %% 
-nr = 200%A3(1);
-nz = 400%A3(2);
+nr = 3000%A3(1);
+nz = 2000%A3(2);
 
 Ntime = 2500%A3(3);
 snap  = 20%A3(4);%1;%
@@ -35,7 +42,7 @@ figure('Position',[1 scrsz(4)/2 scrsz(3)/1.7 scrsz(4)/1.7],...
 
 
 
-for j=1:Nsnap
+for j=1:20%Nsnap
     
     clf
     
@@ -44,11 +51,11 @@ for j=1:Nsnap
     %    'Color','w');
     
     
-    PHI=reshape(A1(1+nr*nz*(j-1):nr*nz*j),nz,nr);
+    PHI=reshape(A(1+nr*nz*(j-1):nr*nz*j),nz,nr);
     
     %for jmovie=1:3
     % subplot(5,3,j)
-    surfc(R,Z,log10(PHI+1e-12),...
+    surfc(R,Z,log10(PHI+1e-8),...
         'FaceColor','interp',...
         'EdgeColor','none')
     daspect([1 1 1])
@@ -64,7 +71,7 @@ for j=1:Nsnap
     hold on
     %plot3([0 max(r)],[0 0],[1 1]*(1),'Color','w')
     %plot3([r0 r0],[min(z) max(z)],[1 1]*(1),'Color','w')    
-    
+    caxis([-12 -6])
     h = colorbar('location','EastOutside');
     set(get(h,'YLabel'),'String','| \phi |  ',...
      'fontsize',16)%,'fontweight','b');    
@@ -82,7 +89,7 @@ for j=1:Nsnap
   %  F = getframe(fig);
   %  aviobj = addframe(aviobj,F); 
 %end 
-    pause(0.2)
+    pause(.8)
  %   display(j);
 end    
     

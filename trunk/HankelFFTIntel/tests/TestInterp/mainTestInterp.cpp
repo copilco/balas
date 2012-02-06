@@ -29,8 +29,8 @@ int main()
 	
     
     fstream out0("out0.txt",ios::out);
-    //fstream out1("outH2U.txt",ios::out);
-    //fstream out2("outU2H.txt",ios::out);
+    fstream out1("outH2U.txt",ios::out);
+    fstream out2("outU2H.txt",ios::out);
     fstream out3("outErrorH2U.txt",ios::out);
     fstream out4("outErrorU2H.txt",ios::out);
     
@@ -39,31 +39,31 @@ int main()
     //  Parameters  //
     //////////////////
     
-    int Nr=1000;//520;
-    int Nz=1000;//680;
+    int Nr=500;
+    int Nz=750;
     
-    double dr=0.05;
-    double dz=0.1;
-    double dt=0.005;
+    double dz=0.2;
+	double absdt = 0.1;
+    complex dt = complex(0.1,0.);
     
-    int Ntime=200;
-    int snap=30;
+    int Ntime=5000;
+    int snap=20;
     
     //Gaussian parameters
     
-	double Rmax  = ceil(Nr*dz);
-    double rho0  = Rmax/2.;
-	double rho00 = 12.;
+	double Rmax  = 150.;
+    double rho0  = 0.;
+	double rho00 = 0.;
 	double z0    = 0.;		
-	double v0r   = 0.;//5.;
-	double v0z   = 0.0;	
+	double v0r   = 0.;
+	double v0z   = 0.;	
 	double sigma = 25.;
     
     // Print out the information on the screen
     
     cout << "\nNr: " << Nr << endl;
     cout << "Nz: " << Nz << endl;
-    cout << "dr: " << dr << endl;
+    cout << "dr: " << Rmax/double(Nr) << endl;
     cout << "dz: " << dz << endl;
     cout << "dt: " << dt << endl;
     cout << "Ntime: " << Ntime << endl;
@@ -88,7 +88,7 @@ int main()
     waveH2D wH;
 	wH.initialize(HH,Nz,dz);
     
-    waveH2D wHinterp;
+    waveH2D wHInterp;
 	wHInterp.initialize(HH,Nz,dz);
     
     waveUniform2D wU;
@@ -103,19 +103,21 @@ int main()
 	for(int j=0; j<Nr; j++)
 		for (int i=0; i<Nz; i++)
         {
-			//w.phi[w.index(j,i)]=exp(-(w.r[j]-rho0)*(w.r[j]-rho0)/sigma/sigma-(w.z[i]*w.z[i])/sigma/sigma);
-			wH.phi[w.index(j,i)]= wH.r[j]*exp(  -(wH.r[j] - rho0)*(wH.r[j] - rho0)/sigma -(wH.z[i] - z0)*(wH.z[i] - z0)/sigma )*exp(I* v0r*(wH.r[j] - rho0) + v0z*(wH.z[i] - z0)  );
-			//if (w.r[j]>=rho00*0.)
-            //v[w.index(j,i)]=-100.0/sqrt(1.+(w.r[j]-rho00)*(w.r[j]-rho00)+(w.z[i] - 2.*z0)*(w.z[i] - 2.*z0) )*1.
+			wH.phi[wH.index(j,i)]= exp(  -(wH.r[j] - rho0)*(wH.r[j] - rho0)/sigma/sigma -(wH.z[i] - z0)*(wH.z[i] - z0)/sigma/sigma )*exp(I* v0r*(wH.r[j] - rho0) + v0z*(wH.z[i] - z0)  );
+			wU.phi[wU.index(j,i)]= exp(  -(wU.r[j] - rho0)*(wU.r[j] - rho0)/sigma/sigma -(wU.z[i] - z0)*(wU.z[i] - z0)/sigma/sigma )*exp(I* v0r*(wU.r[j] - rho0) + v0z*(wU.z[i] - z0)  );
+
         }
     
     
     // Check the norm
     
-    cout << "\n\nOriginal norm: " << wH.norm() << endl;
+    cout << "\n\nOriginal norm in Hankel: " << wH.norm() << endl;
     wH.normalize();
-    cout << "Initial norm: " << wH.norm() << endl;
+    cout << "Initial norm in Hankel: " << wH.norm() << endl;
     
+	cout << "\n\nOriginal norm in Uniform: " << wU.norm() << endl;
+    wU.normalize();
+    cout << "Initial norm in Uniform: " << wU.norm() << endl;
     
     /////////////////////////////////
     //  Save initial wavefunction  //
@@ -123,16 +125,8 @@ int main()
     
     for(int j=0;j<Nr;j++)
 		for(int i=0;i<Nz;i++)
-			out0 << abs(conj(wH.phi[wH.index(j,i)])*wH.phi[wH.index(j,i)])*wH.r[j] << endl;
-    
-    
-	// Copy the wavefunction to the others objects
-	
-	for(int j=0;j<Nr;j++)
-		for(int i=0;i<Nz;i++)
-		{
-			wU.phi[wU.index(j,i)]=wH.phi[wH.index(j,i)];
-		}
+			out0 << abs(conj(wH.phi[wH.index(j,i)])*wH.phi[wH.index(j,i)])*wH.r[j] << "  " << abs(conj(wU.phi[wU.index(j,i)])*wU.phi[wU.index(j,i)])*wU.r[j] << endl;
+
 	
     ////////////////////////////
     //  Prepare Crank arrays  //
@@ -147,7 +141,7 @@ int main()
     //  Start temporal loop  //
     ///////////////////////////
     
-    for (int ktime=0; ktime<Ntime; ktime++)
+    for (int ktime=0; ktime<5+0*Ntime; ktime++)
 	{
         
         cout << "Loop number: " << ktime << endl;
@@ -156,27 +150,9 @@ int main()
         //////////////////////////////////
         //  Evolve in Hankel Transform  //
         //////////////////////////////////
-        
-        
-		wH.FFTFor();
-        wH.phi2F(HH);
-        wH.HankelTransform(HH);
 		
-		fase=0.;
-		
-        for(int j=0;j<Nr;j++)
-			for(int i=0;i<Nz;i++)
-			{
-				fase=dospi*dospi*HH.v[j]*HH.v[j]*dt/2.+wH.q[i]*wH.q[i]*dt/2.;
-				wH.G[wH.index(j,i)]*=exp(I*fase);
-			}
-        
-		
-        wH.HankelTransformBack(HH);
-        wH.F2phi(HH);
-		wH.FFTBack();
-
-        
+		 wH.prop_kinetic(HH,dt);
+		 
         ////////////////////////////////
         //  Evolve in Crank-Nicolson  //
         ////////////////////////////////
@@ -193,10 +169,10 @@ int main()
         
 		
 		interpH2U(wH, wUInterp);
-        interpU2H(wU, wHInterp);
+        //interpU2H(wU, wHInterp);
         
 		
-        cout << wHInterp.norm() << endl; 
+        //cout << wHInterp.norm() << endl; 
         cout << wUInterp.norm() << endl;
         
         
@@ -207,25 +183,25 @@ int main()
         for(int j=0;j<Nr;j++)
 			for(int i=0;i<Nz;i++)
             {
-				//out1 << ktime << "  " << abs(conj(wH.phi[wH.index(j,i)])*wH.phi[wH.index(j,i)])*wH.r[j] << "  " << abs(conj(wHInterp.phi[wHInterp.index(j,i)])*wHInterp.phi[wHInterp.index(j,i)])*wHInterp.r[j] << endl;
-                //out2 << ktime << "  " << abs(conj(wU.phi[wU.index(j,i)])*wU.phi[wU.index(j,i)])*wU.r[j] << "  " << abs(conj(wUInterp.phi[wUInterp.index(j,i)])*wUInterp.phi[wUInterp.index(j,i)])*wUInterp.r[j] << endl;
+				out1 << ktime << "  " << abs(conj(wH.phi[wH.index(j,i)])*wH.phi[wH.index(j,i)])*wH.r[j] << "  " << abs(conj(wUInterp.phi[wUInterp.index(j,i)])*wUInterp.phi[wUInterp.index(j,i)])*wUInterp.r[j] << endl;
+                out2 << ktime << "  " << abs(conj(wU.phi[wU.index(j,i)])*wU.phi[wU.index(j,i)])*wU.r[j] << "  " << abs(conj(wHInterp.phi[wHInterp.index(j,i)])*wHInterp.phi[wHInterp.index(j,i)])*wHInterp.r[j] << endl;
             }
-    
+		
         
-		cout << ktime << "  " << 1.-wH.norm() << "  " << 1.-wHInterp.norm() << endl;
+		cout << 1.-wH.norm() << "  " << 1.-wUInterp.norm() << endl;
         
-        out3 << ktime << "  " << 1.-wH.norm() << "  " << 1.-wHInterp.norm() << endl;
+        out3 << ktime << "  " << 1.-wH.norm() << "  " << 1.-wUInterp.norm() << endl;
         
-        cout << ktime << "  " << 1.-wU.norm() << "  " << 1.-wUInterp.norm() << endl;
+        cout << 1.-wU.norm() << "  " << 1.-wHInterp.norm() << endl;
 
-        out4 << ktime << "  " << 1.-wU.norm() << "  " << 1.-wUInterp.norm() << endl;
+        out4 << ktime << "  " << 1.-wU.norm() << "  " << 1.-wHInterp.norm() << endl;
         
     }
     
     
     out0.close();
-    //out1.close();
-    //out2.close();
+    out1.close();
+    out2.close();
     out3.close();
     out4.close();
     

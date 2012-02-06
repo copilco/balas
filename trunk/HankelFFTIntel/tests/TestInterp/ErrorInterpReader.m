@@ -24,18 +24,6 @@ ErrorU2Hu=A4(:,3);
 scrsz = get(0,'ScreenSize');
 figure('Position',[1 scrsz(4)/2 scrsz(3)/1.7 scrsz(4)/1.7],'Color','w');
 
-subplot(2,1,1)
-plot(time,ErrorH2Uh,'LineWidth',3)
-hold on
-plot(time,ErrorH2Uu,'ro','LineWidth',1)
-hold off
-xlabel('Temporal iterations','fontsize',12)
-ylabel('Error','fontsize',12)
-title('Comparision in error in normalization. H2U','fontsize',16)
-grid on
-hleg1 = legend('Hankel','Uniform');
-
-subplot(2,1,2)
 plot(time,log10(abs(ErrorH2Uh)),'LineWidth',3)
 hold on
 plot(time,log10(abs(ErrorH2Uu)),'ro','LineWidth',1)
@@ -44,7 +32,7 @@ xlabel('Temporal iterations','fontsize',12)
 ylabel('Logaritmic error','fontsize',12)
 title('Comparision in error normalization. H2U','fontsize',16)
 grid on
-hleg1 = legend('Hankel','Uniform');
+hleg1 = legend('Hankel','Hankel Interp');
 
 
 %% Plot the error in normalization H2U
@@ -52,18 +40,6 @@ hleg1 = legend('Hankel','Uniform');
 scrsz = get(0,'ScreenSize');
 figure('Position',[1 scrsz(4)/2 scrsz(3)/1.7 scrsz(4)/1.7],'Color','w');
 
-subplot(2,1,1)
-plot(time,ErrorU2Hh,'LineWidth',3)
-hold on
-plot(time,ErrorU2Hu,'ro','LineWidth',1)
-hold off
-xlabel('Temporal iterations','fontsize',12)
-ylabel('Error','fontsize',12)
-title('Comparision in error in normalization. U2H','fontsize',16)
-grid on
-hleg1 = legend('Hankel','Uniform');
-
-subplot(2,1,2)
 plot(time,log10(abs(ErrorU2Hh)),'LineWidth',3)
 hold on
 plot(time,log10(abs(ErrorU2Hu)),'ro','LineWidth',1)
@@ -72,4 +48,4 @@ xlabel('Temporal iterations','fontsize',12)
 ylabel('Logaritmic error','fontsize',12)
 title('Comparision in error normalization. U2H','fontsize',16)
 grid on
-hleg1 = legend('Hankel','Uniform');
+hleg1 = legend('Uniform','Uniform Interp');

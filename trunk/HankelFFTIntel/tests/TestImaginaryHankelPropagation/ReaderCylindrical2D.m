@@ -7,8 +7,8 @@ A1 = importdata('out1.txt');
 A2 = importdata('out2.txt');
 
 %% 
-nr = 100;
-nz = 200;
+nr = 500;
+nz = 750;
 
 Ntime = 2000
 snap  = 20
