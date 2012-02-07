@@ -1,18 +1,21 @@
-/*
- *  tools.h
- *  
- *
- *  Created by Camilo Ruiz Méndez on 30/11/11.
- *  
- *
- */
+//
+//  tools.h
+//  
+//
+//  Created by Camilo Ruiz Méndez on 30/11/11.
+//  
+//
+//
+
 #ifndef TOOLS_H
 #define TOOLS_H
 
 #include <iostream>
 #include <math.h>
 #include <new>
-#include "waveUniform2D.h"
+#include <complex>
+#include <vector>
+#include "constant.h"
 
 
 using namespace std;

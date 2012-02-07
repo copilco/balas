@@ -2,6 +2,8 @@
 
 clear all
 
+ax = importdata('axes.txt');
+qax = importdata('qaxes.txt');
 A0 = importdata('out0.txt');
 A1 = importdata('out1.txt');
 A2 = importdata('out2.txt');
@@ -18,10 +20,15 @@ nz = 400; %A3(2);
 snap  = length(A3)/nr/nz;%1;%
 Nsnap = snap-1;%floor(Ntime/snap);
 
-r = A0(1:nr);
-z = A0(nr+1:nz+nr);
+r = ax(1:nr);
+z = ax(nr+1:nz+nr);
 
 [Z R] = meshgrid(z,r);
+
+kr = qax(1:nr);
+kz = qax(nr+1:nz+nr);
+
+[KR KZ] = meshgrid(kr,kz);
 
 dt = 0.05;
 
@@ -33,9 +40,10 @@ ksnap = floor(length(t)/snap);
 
 %% Movie time interaction
 % aviobj = avifile('EWP.avi');
-% scrsz = get(0,'ScreenSize');
-% fig=figure('Position',[1 scrsz(4) scrsz(3)*0.5 scrsz(4)*0.8],...
-%     'Color','w');
+
+scrsz = get(0,'ScreenSize');
+figure('Position',[1 scrsz(4) scrsz(3)*0.5 scrsz(4)*0.8],...
+    'Color','w');
 
 
 xmin = -50;
@@ -47,7 +55,7 @@ ymax =  60;
 for j=1:4:Nsnap+2
     %clf
     
-    figure
+    %figure
     
     PHI  = reshape(A3(1+nr*nz*(j-1):nr*nz*j),nz,nr);    
     PHI_Mask  = reshape(A6(1+nr*nz*(j-1):nr*nz*j),nz,nr);    
@@ -143,6 +151,21 @@ end
 
 %%
 
+PHIQ = reshape(A0,nz,nr);
 
 
+surf(KR,KZ,log10(QQ+1e-12),'FaceColor','interp','EdgeColor','none')
+view(2)
+axis tight
+
+h=gca;    
+set(h,'fontsize',16)
+
+xlabel('kz (a.u.) ','fontsize',16)%,'fontweight','b')
+ylabel('k\rho (a.u.) ','fontsize',16)%,'fontweight','b')
+
+title('ElectronicWavePacket in momentum space','fontsize',16)
+h = colorbar('location','EastOutside');
+%set(get(h,'YLabel'),'String',' |\rho \phi |^2  ',...
+%    'fontsize',16)%,'fontweight','b');
 

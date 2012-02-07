@@ -1,28 +1,30 @@
-/*
- *  wave.h
- *  
- *
- *  Created by Camilo Ruiz Méndez on 29/11/11.
- *  Copyright 2011 USAL. All rights reserved.
- *
- */
+//
+//  waveUniform2D.h
+//  
+//
+//  Created by Camilo Ruiz Méndez on 29/11/11.
+//  
+//
+//
 
 #ifndef WAVEUNIFORM2D_H
 #define WAVEUNIFORM2D_H
+
 
 #include <complex>
 #define MKL_Complex16 std::complex<double>
 #include "mkl.h"
 #include "mkl_dfti.h"
+#include "HankelMatrix.h"
+#include "constant.h"
 #include "tools.h"
-
 
 
 class waveUniform2D
 {
 	
 public:
-
+	
 	int Nr,Nz;
 	double *r,dr;
 	double *z,dz;
@@ -82,7 +84,7 @@ public:
 		pot=(double*)mkl_malloc(Nz*Nr*sizeof(double),16);
 		
 		r=(double*)mkl_malloc(Nr*sizeof(double),16);
-		z=(double*)mkl_malloc(Nr*sizeof(double),16);
+		z=(double*)mkl_malloc(Nz*sizeof(double),16);
 		
 		
 		rv_r=(complex*)mkl_malloc(Nr*sizeof(complex),16);
@@ -133,12 +135,14 @@ public:
 		//***********************************************************
 		
 		r[0]=dr/2.;
-		for (int i=1; i<Nr; i++)
-			r[i] =r[i-1]+dr ;
 		
-		for (int i=0; i<Nz; i++)
+		for (int j=1;j<Nr;j++)
+			r[j] =r[j-1]+dr;
+		
+
+		for (int i=0;i<Nz;i++)
 			z[i] =(-(Nz-1)/2. + i)*dz;
-		
+				
 	}
 	
 	/***********************************************************/	
@@ -169,10 +173,6 @@ public:
 		for(int i=0;i<Nr*Nz;i++)
 			phi[i]=phi[i]/sqrt(norm1);
 	}
-	
-	
-	
-	
 	
 	
 	//***********************************************************
@@ -510,7 +510,7 @@ public:
 	 
 	//****************************************                                                                            
 	//    Gaussian with initial velocity                                                                                          
-	//*****************************************                                                                                             
+	//****************************************                                                                                             
 	void velocity_gaussian( double r0, double z0, double vr0, double vz0, double rsigma, double zsigma )
 	{	    
 		for(int j=0; j<Nr; j++)
@@ -520,30 +520,28 @@ public:
 	}//End Gaussian Velocity 
         
 	
-	
-		
 	//***************************************
 	//               Save axes
 	//***************************************	
+	
 	void saveAxes(fstream &file)
 	{
 		for(int j=0;j<Nr;j++)
 			file << r[j] << endl;
 		
-		for(int j=0;j<Nz;j++)
-			file << z[j] << endl;
+		
+		for(int i=0;i<Nz;i++)
+			file << z[i] << endl;
+		
+		
 	}//End save axes
-		
-		
-	
 	
 	
 	//***************************************
 	//           Mask function 2D
 	//***************************************
-	void mask_function2D( waveUniform2D &pphi, const double &x0, const double &x1, const double &sigma, const double rho0=0. , const double z0=0. )
+	void mask_function2D(waveUniform2D &wp,const double &x0,const double &x1,const double &sigma,double rho0=0.0,double z0=0.0)
 	{
-		
 		double x;
 		
 		for(int j=0;j<Nr;j++)
@@ -552,13 +550,13 @@ public:
 				x = sqrt( (r[j]-rho0) * (r[j]-rho0) + (z[i]-z0) * (z[i]-z0) );
 				
 				if(x<=x0)
-					pphi.phi[index(j,i)]*=0.;
+					wp.phi[index(j,i)]=0.;
 				
 				if(x>x0 && x<=x1)
-					pphi.phi[index(j,i)]=phi[index(j,i)]*(1.-exp(-(x-x0)*(x-x0)/sigma/sigma));
+					wp.phi[index(j,i)]=phi[index(j,i)]*(1.-exp(-(x-x0)*(x-x0)/sigma/sigma));
 				
 				if(x>x1)
-					pphi.phi[index(j,i)]=phi[index(j,i)];
+					wp.phi[index(j,i)]=phi[index(j,i)];
 				
 			}
 		
