@@ -1,14 +1,14 @@
 //Constants
+
 #ifndef CONSTANT_H
 #define CONSTANT_H
-#include <stdio.h>
+
 #include <iostream>
 #include <math.h>
 #include <new>
 #include <vector>
 #include <string>
 #include <complex>
-//#define complex complex<double>
 #define MKL_Complex16 std::complex<double>
 #define complex complex<double>
 

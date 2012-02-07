@@ -23,10 +23,9 @@ public:
 	int Nr,Nz;
 	int space_indicator;  //Defines in which space you are.
 	double *r, *dr;
-	double rho0, z0;
 	double *v, *dv, *kr, *dkr;
 	double *z,dz,*q,dq,qmax;
-
+	
 	complex *F,*phi;
 	complex *G,*phik;
 	
@@ -190,11 +189,11 @@ public:
 	//   Set potencial of the hamiltonian   //
 	/****************************************/
 	
-	void set_potencial_hlike1D(double charge_nuclei=1., double soft_core=2.)
+	void set_potential_hlike2D(double charge_nuclei=1., double soft_core=2.)
 	{
 		for(int j=0; j<Nr; j++)
 			for (int i=0; i<Nz; i++)
-				pot[index(j,i)]=charge_nuclei*charge_electron_au/sqrt(soft_core+(r[j]-rho0)*(r[j]-rho0)+(z[i]-z0)*(z[i]-z0));
+				pot[index(j,i)]=charge_nuclei*charge_electron_au/sqrt(soft_core+(r[j])*(r[j])+(z[i])*(z[i]));
 	
 	}
 	
@@ -367,7 +366,7 @@ public:
 	
 	/***************************************/	
 	// Preparing the arrays for the Crank  //
-	/***************************************/
+	/***************************************
 	
 	void PrepareCrankArrays(double dt)
 	{
@@ -504,6 +503,7 @@ public:
 		}	
 	}
 	
+	 */
 	
 	
 	void absorber(const double &frac_r_left,const double &frac_z_left,const double &frac_r_right,const double &frac_z_right,const double &exponent)
@@ -674,7 +674,7 @@ public:
 	//   Utility functions      //
 	/****************************/
 	
-	void mask_function2D(waveH2D &mom_w,const double &x0,const double &x1,const double &sigma)
+	void mask_function2D(waveH2D &mom_w,const double &x0,const double &x1,const double &sigma,double rho0=0.0,double z0=0.0)
 	{
 		
 		double x;

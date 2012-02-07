@@ -49,6 +49,9 @@ void interpH2U(waveH2D &wHank, waveUniform2D &wU)
     double *scoeffReal;
 	double *scoeffImag;
 	
+	double normH = 0.0;
+	double normU = 0.0;
+	
     
 	int errcode = 0;
     
@@ -210,6 +213,19 @@ void interpH2U(waveH2D &wHank, waveUniform2D &wU)
 		
 		
 	}
+	
+	/////////////////////////////////////////////////////////////////
+	// Set the original normalization to the interpolated function //
+	/////////////////////////////////////////////////////////////////
+	
+	normH = wHank.norm();
+	normU = wU.norm();
+	
+	for(int i=0;i<Nr*Nz;i++)
+	{
+		wU.phi[i]=wU.phi[i]/sqrt(normU/normH);
+	}
+	
 
 	///////////////////////////
 	// Free auxiliary arrays //
@@ -246,7 +262,9 @@ void interpU2H(waveUniform2D &wU, waveH2D &wHank)
     MKL_INT *cells = new MKL_INT[wU.Nr];
     double *scoeffReal;
 	double *scoeffImag;
-    
+	
+	double normU = 0.0;
+    double normH = 0.0;
     
     int errcode = 0;
     
@@ -407,7 +425,20 @@ void interpU2H(waveUniform2D &wU, waveH2D &wHank)
 		CheckDfError(errcode);
 		
     }
+	
+	/////////////////////////////////////////////////////////////////
+	// Set the original normalization to the interpolated function //
+	/////////////////////////////////////////////////////////////////
+	
+	normU = wU.norm();
+	normH = wHank.norm();
+
+	for(int i=0;i<Nr*Nz;i++)
+	{
+		wHank.phi[i]=wHank.phi[i]/sqrt(normH/normU);
+	}
     
+	
     ///////////////////////////
 	// Free auxiliary arrays //
 	///////////////////////////

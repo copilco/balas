@@ -106,7 +106,7 @@ int main()
     
 	
 	FILE *bwave;
-	bwave=fopen("../ImaginaryPropCrank2D/binwave.bin","rb") ;
+	bwave=fopen("./binwave.bin","rb") ;
 	w0.binread(bwave);
 	placeWF( w, w0);	
 	
