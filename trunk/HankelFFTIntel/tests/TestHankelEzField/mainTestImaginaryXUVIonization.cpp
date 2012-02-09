@@ -233,7 +233,7 @@ int main()
 		
 		efield_z=e0*sin(ww*abs(t)/2./cycle_number)*sin(ww*abs(t)/2./cycle_number)*sin(ww*abs(t)+cep);
 		
-		avect_z=-efield_z*abs(dt)*lightC_au;
+		avect_z+=-efield_z*abs(dt)*lightC_au;
 		
 		
 		
