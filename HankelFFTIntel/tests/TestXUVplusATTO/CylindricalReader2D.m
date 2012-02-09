@@ -14,7 +14,7 @@ A6 = importdata('out6.txt');
 
 %% Grid parameters
 nr = 250; %A3(1);
-nz = 400; %A3(2);
+nz = 600; %A3(2);
 
 
 snap  = length(A3)/nr/nz;%1;%
@@ -53,12 +53,15 @@ ymax =  60;
 
 
 for j=1:4:Nsnap+2
+    
     %clf
     
-    %figure
+%     scrsz = get(0,'ScreenSize');
+%     figure('Position',[1 scrsz(4) scrsz(3)/2 scrsz(4)/1.25],...
+%         'Color','w');
     
-    PHI  = reshape(A3(1+nr*nz*(j-1):nr*nz*j),nz,nr);    
-    PHI_Mask  = reshape(A6(1+nr*nz*(j-1):nr*nz*j),nz,nr);    
+    PHI  = reshape(A3(1+nr*nz*(j-1):nr*nz*j),nz,nr);
+    PHI_Mask  = reshape(A6(1+nr*nz*(j-1):nr*nz*j),nz,nr);
     
     
     subplot(3,4,[1 2 3 4] )
@@ -83,7 +86,7 @@ for j=1:4:Nsnap+2
     set(get(h,'YLabel'),'String',' |\rho \phi |^2  ',...
         'fontsize',16)%,'fontweight','b');    
     
-    caxis([-12 0])
+    %caxis([-12 0])
     
     xlim([xmin xmax])
     ylim([ymin ymax])
@@ -128,7 +131,7 @@ for j=1:4:Nsnap+2
     subplot(3,4,[ 9 10 11 12])
     plot(t,Exuv/max(Exuv),'--b','linewidth',1)
     hold on
-    plot(t(1:ksnap*j+1) ,Exuv(1:ksnap*j+1)/max(Exuv),'Color',[0.5 0 1],'linewidth',6)
+    plot(t(1:ksnap*j) ,Exuv(1:ksnap*j)/max(Exuv),'Color',[0.5 0 1],'linewidth',6)
     
     
     xlabel('t (a.u.) ','fontsize',16)%   
@@ -153,19 +156,52 @@ end
 
 PHIQ = reshape(A0,nz,nr);
 
+krmax = 3;
+krmin = 0;
+kzmax = 3;
+kzmin = -3;
+wx=0.057;
+Ip=0.5;
+p0=sqrt(2*(wx-Ip));
 
-surf(KR,KZ,log10(QQ+1e-12),'FaceColor','interp','EdgeColor','none')
+theta=0: (2*pi/(nz-1)): 2*pi;
+
+scrsz = get(0,'ScreenSize');
+figure('Position',[1 scrsz(4) scrsz(3)*0.5 scrsz(4)*0.8],...
+    'Color','w');
+surf(KR,KZ,log10(PHIQ+1e-12),'FaceColor','interp','EdgeColor','none')
 view(2)
 axis tight
+daspect([1,1,1])
+hold on
+plot3(p0*cos(theta), p0*sin(theta),ones(1,nz)*(-9),'linewidth',5,'Color','w' )
+xlim([krmin krmax])
+ylim([kzmin kzmax])
+    
 
 h=gca;    
 set(h,'fontsize',16)
 
-xlabel('kz (a.u.) ','fontsize',16)%,'fontweight','b')
-ylabel('k\rho (a.u.) ','fontsize',16)%,'fontweight','b')
+xlabel('k\rho (a.u.) ','fontsize',16)%,'fontweight','b')
+ylabel('kz (a.u.) ','fontsize',16)%,'fontweight','b')
 
 title('ElectronicWavePacket in momentum space','fontsize',16)
 h = colorbar('location','EastOutside');
 %set(get(h,'YLabel'),'String',' |\rho \phi |^2  ',...
 %    'fontsize',16)%,'fontweight','b');
+%caxis([-10 -6.5])
 
+%%
+
+scrsz = get(0,'ScreenSize');
+figure('Position',[1 scrsz(4) scrsz(3)/1.2 scrsz(4)*0.8],...
+    'Color','w');
+
+plot(kz,PHIQ(:,1),'LineWidth',1.5)
+xlim([kzmin kzmax])
+
+grid on
+
+xlabel('Kz (a.u.)','fontsize',16)
+ylabel('Momentum distribution','fontsize',16)
+title('Momentum distribution in z axis','fontsize',16)

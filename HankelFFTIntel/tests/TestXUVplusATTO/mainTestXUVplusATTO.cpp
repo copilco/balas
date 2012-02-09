@@ -48,12 +48,12 @@ int main()
     //  Parameters  //
     //////////////////    
     
-	int Nr=250;//520;
-    int Nz=400;//680;
+	int Nr=250;
+    int Nz=600;//400;
     
     double dz = 0.3;
     double dr = 0.3;
-    double dt = 0.05;//complex(0.01,0.);
+    complex dt = complex(0.05,0.);
     
 	
 	// Hydrogen parameters 
@@ -65,19 +65,20 @@ int main()
 	//Laser parameters
 
 	double efieldz;
-    double wx      = 1.1;
+	double avect_z;
+    double wx      = 0.057;//1.1;
 	double periodx = dospi/wx;
-	int ncycle     = 5;
+	int ncycle     = 3;
 	double sigmax  = ncycle*periodx/(8.*log(2.));
-    double efield0 = sqrt( 5.0e12/(3.5e16) );
+    double efield0 = sqrt( 5.0e13/(3.5e16) );
 	double cep   = 0.0  ;
 	
 	double t       = 0.;
-	double tmin    = -2.5*periodx;
-	double tmax    =  5.0*periodx;	
+	double tmin    = -1.2*periodx;
+	double tmax    =  ncycle*periodx;	
 	
 	int snap=30;
-    int Ntime =  floor( (tmax-tmin)/dt ) +1;
+    int Ntime =  floor( (tmax-tmin)/abs(dt) ) +1;
 	
     //Gaussian parameters
    
@@ -89,7 +90,7 @@ int main()
 	cout << "\nNr= " << Nr << endl;
     cout << "Nz= " << Nz << endl;
     cout << "dz= " << dz << endl;
-    cout << "dt= " << dt << endl;
+    cout << "dt= " << abs(dt) << endl;
 	cout << "Rmax: " << Rmax << endl;
    
     
@@ -159,7 +160,7 @@ int main()
 	{
 		cout << "Loop number: " << ktime << endl;
 		
-		t= tmin + ktime*dt;
+		t= tmin + ktime*abs(dt);
 		
 		// Gausian pulse
 		efieldz = efield0*exp(-t*t/sigmax/sigmax)*sin( wx*t + cep );
@@ -168,9 +169,12 @@ int main()
 		//efieldz = efield0*sin(wx*t/2./ncycle)*sin(wx*t/2./ncycle)*sin(wx*t+cep);
 		
 		
-		w.Zprop_PAG(dt/2., efieldz );
-		w.Rprop(  complex(dt,0.) );
-		w.Zprop_PAG(dt/2., efieldz );
+		avect_z+=-efieldz*abs(dt);
+		
+		
+		w.Zprop_PAG(dt/2., avect_z );
+		w.Rprop(dt);
+		w.Zprop_PAG(dt/2., avect_z );
 		
 		
 		w.absorber(0.0, 0.1, 0.1, 0.1, 1./6.);	   
