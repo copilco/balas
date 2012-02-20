@@ -49,7 +49,7 @@ int main()
     //////////////////    
     
 	int Nr=250;
-    int Nz=600;//400;
+    int Nz=400;
     
     double dz = 0.3;
     double dr = 0.3;
@@ -204,6 +204,8 @@ int main()
 			//Snapshot mask
 			w0.snapshot(out6,1,1);
 			
+			interpU2H(w0,w1);
+			w1.qsnapshot(out0,HH);
 			
 			out4 << 1.-w.norm() << " " << Energy1 << endl;
 			
@@ -215,10 +217,9 @@ int main()
 	
 	
 	
-	interpU2H(w0,w1);
-	
+		
 	w1.saveQAxes(qaxes);
-	w1.qsnapshot(out0,HH);
+	
 
 	
 	

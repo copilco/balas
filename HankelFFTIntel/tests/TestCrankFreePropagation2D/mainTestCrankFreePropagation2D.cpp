@@ -19,7 +19,7 @@
 
 int main()
 {
-	
+
 	cout << "\n\n////////////////////////////////////////////////////" << endl;
     cout << "////////////////////////////////////////////////////" << endl;
     cout << "mainTestCrankFreePropagation2D. Running example..." << endl;
@@ -39,19 +39,19 @@ int main()
 	int Nr=520;
 	int Nz=680;
 	
-	double dz=0.1;
-	double dr=0.1;
+	double dz=0.3;
+	double dr=0.3;
 	complex dt=complex(0.01,0.);
 	
 	
-	int Ntime=200;
-	int snap=30;
+	int Ntime=100;
+	int snap=10;
 	
 	//Gaussian parameters
     
 	double Rmax  = Nr*dr;
-    double rho0  = Rmax/2.;
-	double rho00 = 12.;
+    double rho0  = 0.;//Rmax/2.;
+	double rho00 = 0.;
 	double z0    = 0.;		
 	double v0r   = 0.;//5.;
 	double v0z   = 0.0;	
@@ -90,10 +90,9 @@ int main()
 	for(int j=0;j<HH.Nr;j++)
 		for(int i=0;i<Nz;i++)
 		{
-			//w.phi[w.index(j,i)]=exp(-(w.r[j]-r0)*(w.r[j]-r0)/sigmar/sigmar-(w.z[i]*w.z[i]))*complex(cos(v0r*(w.r[j]-r0)+v0z*w.z[i]), sin(v0r*(w.r[j]-r0)+v0z*w.z[i])  );
-			w.phi[w.index(j,i)]= w.r[j]*exp(  -(w.r[j] - rho0)*(w.r[j] - rho0)/sigma/sigma -(w.z[i] - z0)*(w.z[i] - z0)/sigma/sigma )*exp(I* (v0r*(w.r[j] - rho0) + v0z*(w.z[i] - z0)) );
+			w.phi[w.index(j,i)]= exp(  -(w.r[j] - rho0)*(w.r[j] - rho0)/sigma/sigma -(w.z[i] - z0)*(w.z[i] - z0)/sigma/sigma )*exp(I* (v0r*(w.r[j] - rho0) + v0z*(w.z[i] - z0)) );
 		}
-			
+	
 	
 	// Check the norm
 	
@@ -129,6 +128,12 @@ int main()
     //  Start temporal loop   //
     ////////////////////////////
 	
+	// This variables is for measure the time elapsed in propagation
+	
+	time_t start, end;
+	double diff;
+	
+	time(&start);
 	
 	for (int ktime=0; ktime<Ntime; ktime++)
 	{
@@ -141,15 +146,15 @@ int main()
         ///////////////
 		
 		
-		w.Zprop1(dt/2.);
+		w.Zprop(dt/2.);
 		w.Rprop(  dt );
-		w.Zprop1(dt/2.);
+		w.Zprop(dt/2.);
 		
 		
-		cout << "Error norm: " << 1.-w.norm() << endl << endl;
+		//cout << "Error norm: " << 1.-w.norm() << endl << endl;
+		
 		
 		if(ktime%(Ntime/(snap-1)) == 0)
-			
 			for(int j=0;j<Nr;j++)
 				for(int i=0;i<Nz;i++)
 					out1 << abs(conj(w.phi[w.index(j,i)])*w.phi[w.index(j,i)])*w.r[j] << endl;	
@@ -191,7 +196,11 @@ int main()
 		
 	}
 	
+	time(&end);
 	
+	diff = difftime(end,start);
+	
+	cout << "Time took by propagation: " << diff << endl;
 	
 	axis.close();
 	out0.close();

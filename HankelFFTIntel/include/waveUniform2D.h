@@ -12,6 +12,9 @@
 
 
 #include <complex>
+#include <math.h>
+#include <new>
+#include "omp.h"
 #define MKL_Complex16 std::complex<double>
 #include "mkl.h"
 #include "mkl_dfti.h"
@@ -34,10 +37,11 @@ public:
 	complex *phi;
 	double *pot;
 	
-	complex *rv_r,*rv_z;
-	complex *phi_r,*phi_z;
-	complex *ar, *br, *cr,*gamr;
-	complex az,*bz,cz,*gamz;
+	complex az, cz, *ar, *cr;
+	//complex *rv_r,*rv_z;
+	//complex *phi_r,*phi_z;
+	//complex *ar, *br, *cr,*gamr;
+	//complex az,*bz,cz,*gamz;
 	
 	
 	/***********************************************************/	
@@ -60,25 +64,6 @@ public:
 		
 		e_charge=-1.;
 		
-		/*
-		phi=new complex[Nr*Nz];		
-		v=new double[Nr*Nz];		
-
-		r=new double[Nr];
-		z=new double[Nz];
-		
-		rv_r=    new complex[Nr];
-		phi_r=   new complex[Nr];
-		ar=      new complex[Nr];
-		br=      new complex[Nr];
-		cr=      new complex[Nr];
-		gamr=    new complex[Nr];
-		
-		rv_z=    new complex[Nz];
-		phi_z=   new complex[Nz];
-		bz=      new complex[Nz];
-		gamz=    new complex[Nz];	
-		*/
 		
 		phi=(complex*)mkl_malloc(Nz*Nr*sizeof(complex),16);
 		pot=(double*)mkl_malloc(Nz*Nr*sizeof(double),16);
@@ -87,6 +72,10 @@ public:
 		z=(double*)mkl_malloc(Nz*sizeof(double),16);
 		
 		
+		ar = (complex*)mkl_malloc(Nr*sizeof(complex),16);
+		cr = (complex*)mkl_malloc(Nr*sizeof(complex),16);
+		
+		/*
 		rv_r=(complex*)mkl_malloc(Nr*sizeof(complex),16);
 		phi_r=(complex*)mkl_malloc(Nr*sizeof(complex),16);
 		ar=(complex*)mkl_malloc(Nr*sizeof(complex),16);
@@ -98,7 +87,7 @@ public:
 		phi_z=(complex*)mkl_malloc(Nz*sizeof(complex),16);
 		bz=(complex*)mkl_malloc(Nz*sizeof(complex),16);
 		gamz=(complex*)mkl_malloc(Nz*sizeof(complex),16);
-		
+		*/
 		
 		/***********************************************************/	
 		//	      	Fill the arrays with zeros.
@@ -110,7 +99,7 @@ public:
 			pot[i]=0.;
 		}
 		
-		
+		/*
 		for(int i=0;i<Nr;i++)
 		{
 			ar[i]    = complex(0.,0.);
@@ -129,7 +118,7 @@ public:
 			bz[i]	=	complex(0.,0.);
 			gamz[i]	=	complex(0.,0.);
 		}
-		
+		*/
 		//***********************************************************	
 		//    	  Fill the grids onto the wavefunction
 		//***********************************************************
@@ -180,6 +169,9 @@ public:
 	//************************************************************
 	void PrepareCrankArrays(complex dt )
 	{
+		int chunk = 8;
+		
+#pragma omp parallel for shared(chunk,dt) schedule(dynamic,chunk)
 		for( int i=0; i<Nr; i++ )
 		{						
 			ar[i]     =    complex( 0., - 1./dr/dr/4. + 1./dr/r[i]/8. )*dt;			
@@ -187,7 +179,7 @@ public:
 			cr[i]     =    complex( 0., - 1./dr/dr/4. - 1./dr/r[i]/8. )*dt;
 		}//End left part
 		
-
+		
 	}
 	
 	
@@ -199,41 +191,67 @@ public:
 	//    	    Z propagator imaginary time
 	//***************************************************	
 	void Zprop( complex dt )	
-	{			
+	{	
 		
 		az = complex(0.,-1./dz/dz/4.)*dt;
-		cz = complex(0.,-1./dz/dz/4.)*dt;		
+		cz = complex(0.,-1./dz/dz/4.)*dt;
 		
-		//Start loop to Nr and Nz 
-		for (int j=0; j<Nr; j++ )
-		{      			
-			//Left part Z
-			for(int i=0; i<Nz; i++)	
-				bz[i]	=  1. + complex( 0., 1./2./dz/dz + pot[index(j,i)]/4. )*dt;
+		int tid;
+		int chunk = 8;
+		
+		
+#pragma omp parallel shared(chunk,dt) private(tid)
+		{
+	
+			complex *rv_z=(complex*)mkl_malloc(Nz*sizeof(complex),16);
+			complex *phi_z=(complex*)mkl_malloc(Nz*sizeof(complex),16);
+			complex *bz=(complex*)mkl_malloc(Nz*sizeof(complex),16);
+			complex *gamz=(complex*)mkl_malloc(Nz*sizeof(complex),16);
 			
 			
-			//Right part Z
-			rv_z[0]	= ( 1. - complex( 0., 1./2./dz/dz + pot[index(j,0)]/4. )*dt )*phi[index(j,0)] + 
-						   - cz*phi[index(j,1)];
-			
-			
-			for (int i=1; i<Nz-1; i++)
-				rv_z[i] = -az*phi[index(j,i-1)]+( 1. - complex(0., 1./2./dz/dz + pot[index(j,i)]/4. )*dt )*phi[index(j,i)] - cz*phi[index(j,i+1)];
-			
-			
-			rv_z[Nz-1] = -az*phi[index(j,Nz-2)]  + ( 1. - complex( 0., 1./2./dz/dz + pot[index(j,Nz-1)]/4. )*dt )*phi[index(j,Nz-1)];
-			//Finishing right part Z
-			
-			
-			
-			//Solving Triagonal Matrix for Z
-			trid_simple( az, bz, cz, rv_z, phi_z, gamz, Nz );
-			
-						
-			//Save function 
-			for (int i=0; i<Nz; i++)
-				phi[index(j,i)] = phi_z[i];
-		}//End loop Nr and Nz
+			//Start loop to Nr and Nz 	
+#pragma omp for schedule(dynamic,chunk)
+			for (int j=0; j<Nr; j++ )
+			{      			
+				//tid = omp_get_thread_num();
+				
+				//printf("Thread number %d is doing loop number %d.\n",tid,j);
+				
+				//Left part Z
+				for(int i=0; i<Nz; i++)	
+					bz[i]	=  1. + complex( 0., 1./2./dz/dz + pot[index(j,i)]/4. )*dt;
+				
+				
+				//Right part Z
+				rv_z[0]	= ( 1. - complex( 0., 1./2./dz/dz + pot[index(j,0)]/4. )*dt )*phi[index(j,0)] + 
+				- cz*phi[index(j,1)];
+				
+				
+				for (int i=1; i<Nz-1; i++)
+					rv_z[i] = -az*phi[index(j,i-1)]+( 1. - complex(0., 1./2./dz/dz + pot[index(j,i)]/4. )*dt )*phi[index(j,i)] - cz*phi[index(j,i+1)];
+				
+				
+				rv_z[Nz-1] = -az*phi[index(j,Nz-2)]  + ( 1. - complex( 0., 1./2./dz/dz + pot[index(j,Nz-1)]/4. )*dt )*phi[index(j,Nz-1)];
+				//Finishing right part Z
+				
+				
+				//Solving Triagonal Matrix for Z
+				trid_simple( az, bz, cz, rv_z, phi_z, gamz, Nz );
+				
+				
+				//Save function 
+				for (int i=0; i<Nz; i++)
+					phi[index(j,i)] = phi_z[i];
+			}//End loop Nr and Nz
+		
+		
+			mkl_free(rv_z);
+			mkl_free(bz);
+			mkl_free(phi_z);
+			mkl_free(gamz);
+		
+		}
+		
 	}//Z propagator imaginary time	
 	
 	
@@ -246,44 +264,69 @@ public:
 	void Rprop( complex dt )
 	{
 		
-		//  RHO_Operator dt	
-		for ( int i=0; i<Nz; i++ )
+		int tid;
+		int chunk = 8;
+		
+		
+#pragma omp parallel shared(chunk,dt) private(tid)
 		{
-			
-			//Left part Rho
-			for( int j=0; j<Nr; j++ )
-				br[j] = 1. + complex(0., 1./2./dr/dr + pot[index(j,i)]/4. )*dt;
-			//End left part
-						
-			
-			//Right part Rho 
-			rv_r[0] = -ar[0]*phi[index(1,i)] +
-			          (1.  -  complex(0., 1./dr/dr/2. + pot[index(0,i)]/4. )*dt)*phi[index(0,i)]
-			          -cr[0]*phi[index(1,i)];			
+
+			complex *rv_r=(complex*)mkl_malloc(Nr*sizeof(complex),16);
+			complex *phi_r=(complex*)mkl_malloc(Nr*sizeof(complex),16);
+			complex *br=(complex*)mkl_malloc(Nr*sizeof(complex),16);
+			complex *gamr=(complex*)mkl_malloc(Nr*sizeof(complex),16);
 			
 			
+#pragma omp for schedule(dynamic,chunk)
+			//  RHO_Operator dt	
+			for ( int i=0; i<Nz; i++ )
+			{
+				
+				//tid = omp_get_thread_num();
+				
+				//printf("Thread number %d is doing loop number %d.\n",tid,i);
+				
+				//Left part Rho
+				for( int j=0; j<Nr; j++ )
+					br[j] = 1. + complex(0., 1./2./dr/dr + pot[index(j,i)]/4. )*dt;
+				//End left part
+				
+				
+				//Right part Rho 
+				rv_r[0] = -ar[0]*phi[index(1,i)] +
+				(1.  -  complex(0., 1./dr/dr/2. + pot[index(0,i)]/4. )*dt)*phi[index(0,i)]
+				-cr[0]*phi[index(1,i)];			
+				
+				
+				
+				for (int j=1; j<Nr-1; j++) 
+					rv_r[j]	= -ar[j]*phi[index(j-1,i)] + 
+					(1. -  complex( 0., 1./dr/dr/2. + pot[index(j,i)]/4. )*dt)*phi[index(j,i)]
+					-cr[j]*phi[index(j+1,i)];
+				
+				
+				
+				rv_r[Nr-1] =  -ar[Nr-1]*phi[index(Nr-2,i)]  +
+				(1.  -  complex( 0., 1./2./dr/dr + pot[index(Nr-1,i)]/4. )*dt)*phi[index(Nr-1,i)];
+				//Finishing right
+				
+				
+				//Solving Triagonal Matrix
+				tridag(ar, br, cr, rv_r, phi_r, gamr, Nr);
+				
+				
+				for (int j=0; j<Nr; j++)
+					phi[index(j,i)] = phi_r[j];
+			}//End loop on Nz and Nr
 			
-			for (int j=1; j<Nr-1; j++) 
-				rv_r[j]	= -ar[j]*phi[index(j-1,i)] + 
-						  (1. -  complex( 0., 1./dr/dr/2. + pot[index(j,i)]/4. )*dt)*phi[index(j,i)]
-						  -cr[j]*phi[index(j+1,i)];
 			
+			mkl_free(br);
+			mkl_free(rv_r);
+			mkl_free(phi_r);
+			mkl_free(gamr);
 			
-			
-			rv_r[Nr-1] =  -ar[Nr-1]*phi[index(Nr-2,i)]  +
-			              (1.  -  complex( 0., 1./2./dr/dr + pot[index(Nr-1,i)]/4. )*dt)*phi[index(Nr-1,i)];
-			//Finishing right
-			
-			
-			
-			
-			//Solving Triagonal Matrix
-			tridag(ar, br, cr, rv_r, phi_r, gamr, Nr);
-			
-			
-			for (int j=0; j<Nr; j++)
-				phi[index(j,i)] = phi_r[j];
-		}//End loop on Nz and Nr
+		}
+		
 	}//End Rho_propagator imaginary time
 	
 	
@@ -296,51 +339,69 @@ public:
 	void Zprop_PAG( complex dt, double av_z )
 	{
 		
+		int tid;
+		int chunk = 8;		
 		double avsquare = av_z*av_z;
+		
 		
 		az = complex( + e_charge*av_z/dz/4., -1./dz/dz/4. )*dt;
 		cz = complex( - e_charge*av_z/dz/4., -1./dz/dz/4. )*dt;
 		
 		
-		
-		//Start loop to Nr and Nz 
-		for (int j=0; j<Nr; j++ )
+#pragma omp parallel shared(chunk,dt) private(tid)
 		{
 			
-			//Left part Z
-			for(int i=0; i<Nz; i++)	
-				bz[i] = 1. + complex(0., 1./2./dz/dz + (pot[index(j,i)] + e_charge*e_charge*avsquare)/4. )*dt;
+			complex *rv_z=(complex*)mkl_malloc(Nz*sizeof(complex),16);
+			complex *phi_z=(complex*)mkl_malloc(Nz*sizeof(complex),16);
+			complex *bz=(complex*)mkl_malloc(Nz*sizeof(complex),16);
+			complex *gamz=(complex*)mkl_malloc(Nz*sizeof(complex),16);
 			
 			
+			//Start loop to Nr and Nz
+#pragma omp for schedule(dynamic,chunk)
+			for (int j=0; j<Nr; j++ )
+			{
+				
+				//Left part Z
+				for(int i=0; i<Nz; i++)	
+					bz[i] = 1. + complex(0., 1./2./dz/dz + (pot[index(j,i)] + e_charge*e_charge*avsquare)/4. )*dt;
+				
+				
+				
+				
+				//Right part Z
+				rv_z[0]	  = (1. - complex(0., 1./2./dz/dz + (pot[index(j,0)] + e_charge*e_charge*avsquare )/4. )*dt)*phi[index(j,0)] 
+				- cz*phi[index(j,1)];	
+				
+				
+				for (int i=1; i<Nz-1; i++) 
+					rv_z[i] =	-az*phi[index(j,i-1)]  + 
+					(1. - complex(0., 1./2./dz/dz + (pot[index(j,i)] + e_charge*e_charge*avsquare)/4. )*dt )*phi[index(j,i)] 
+					-cz*phi[index(j,i+1)];
+				
+				
+				rv_z[Nz-1]	=	-az*phi[index(j,Nz-2)]  +
+				(1. - complex(0., 1./2./dz/dz + (pot[index(j,Nz-1)] + e_charge*e_charge*avsquare)/4.)*dt )*phi[index(j,Nz-1)];
+				//Finishing right part Z
+				
+				
+				//Solving Triagonal Matrix	for Z
+				trid_simple(az, bz, cz, rv_z, phi_z, gamz, Nz);
+				
+				
+				
+				//Save function 
+				for (int i=0; i<Nz; i++)
+					phi[index(j,i)] = phi_z[i];
+			}
 			
+			mkl_free(rv_z);
+			mkl_free(bz);
+			mkl_free(phi_z);
+			mkl_free(gamz);
 			
-			//Right part Z
-			rv_z[0]	  = (1. - complex(0., 1./2./dz/dz + (pot[index(j,0)] + e_charge*e_charge*avsquare )/4. )*dt)*phi[index(j,0)] 
-						    - cz*phi[index(j,1)];	
-			
-			
-			for (int i=1; i<Nz-1; i++) 
-				rv_z[i] =	-az*phi[index(j,i-1)]  + 
-							 (1. - complex(0., 1./2./dz/dz + (pot[index(j,i)] + e_charge*e_charge*avsquare)/4. )*dt )*phi[index(j,i)] 
-							-cz*phi[index(j,i+1)];
-			
-			
-			rv_z[Nz-1]	=	-az*phi[index(j,Nz-2)]  +
-							(1. - complex(0., 1./2./dz/dz + (pot[index(j,Nz-1)] + e_charge*e_charge*avsquare)/4.)*dt )*phi[index(j,Nz-1)];
-			//Finishing right part Z
-			
-			
-			
-			
-			//Solving Triagonal Matrix	for Z
-			trid_simple(az, bz, cz, rv_z, phi_z, gamz, Nz);
-			
-			
-			
-			//Save function 
-			for (int i=0; i<Nz; i++)
-				phi[index(j,i)] = phi_z[i];
 		}
+		
 	}//Z propagator imaginary time	
 	
 	
@@ -352,47 +413,66 @@ public:
 	//****************************************************************//	
 	void Zprop_REG( complex dt, double efield_z )
 	{
+		
+		int tid;
+		int chunk = 8;	
+		
 		az = complex(0.,-1./dz/dz/4.)*dt;
 		cz = complex(0.,-1./dz/dz/4.)*dt;		
 		
-		//Start loop to Nr and Nz 
-		for (int j=0; j<Nr; j++ )
+#pragma omp parallel shared(chunk,dt) private(tid)
 		{
 			
-			//Left part Z
-			for(int i=0; i<Nz; i++)
-				bz[i] = 1. + complex( 0., 1./2./dz/dz + (pot[index(j,i)] - e_charge*z[i]*efield_z )/4. )*dt;
+			complex *rv_z=(complex*)mkl_malloc(Nz*sizeof(complex),16);
+			complex *phi_z=(complex*)mkl_malloc(Nz*sizeof(complex),16);
+			complex *bz=(complex*)mkl_malloc(Nz*sizeof(complex),16);
+			complex *gamz=(complex*)mkl_malloc(Nz*sizeof(complex),16);
 			
 			
 			
+			//Start loop to Nr and Nz 
+#pragma omp for schedule(dynamic,chunk)
+			for (int j=0; j<Nr; j++ )
+			{
+				
+				//Left part Z
+				for(int i=0; i<Nz; i++)
+					bz[i] = 1. + complex( 0., 1./2./dz/dz + (pot[index(j,i)] - e_charge*z[i]*efield_z )/4. )*dt;
+				
+				
+				//Right part Z
+				rv_z[0]		=   (1. - complex( 0., 1./2./dz/dz + (pot[index(j,0)] - e_charge*z[0]*efield_z )/4. )*dt )*phi[index(j,0)] 
+				- cz*phi[index(j,1)];
+				
+				
+				for (int i=1; i<Nz-1; i++) 
+					rv_z[i] =	- az*phi[index(j,i-1)]  + 
+					(1. - complex( 0., 1./2./dz/dz + (pot[index(j,i)] - e_charge*z[i]*efield_z )/4. )*dt )*phi[index(j,i)] 
+					- cz*phi[index(j,i+1)];
 			
-			//Right part Z
-			rv_z[0]		=   (1. - complex( 0., 1./2./dz/dz + (pot[index(j,0)] - e_charge*z[0]*efield_z )/4. )*dt )*phi[index(j,0)] 
-							    - cz*phi[index(j,1)];
+				
+				rv_z[Nz-1]	=	-az*phi[index(j,Nz-2)]  +
+				(1. - complex( 0., 1./2./dz/dz + (pot[index(j,Nz-1)] - e_charge*z[Nz-1]*efield_z )/4. )*dt )*phi[index(j,Nz-1)];
+				//Finishing right part Z
+				
+				
+				//Solving Triagonal Matrix	for Z
+				trid_simple(az, bz, cz, rv_z, phi_z, gamz, Nz);
+				
+				
+				
+				//Save function 
+				for (int i=0; i<Nz; i++)
+					phi[index(j,i)] = phi_z[i];
+			}//end loop Nr and Nz
 			
+			mkl_free(rv_z);
+			mkl_free(bz);
+			mkl_free(phi_z);
+			mkl_free(gamz);
 			
-			for (int i=1; i<Nz-1; i++) 
-				rv_z[i] =	- az*phi[index(j,i-1)]  + 
-							(1. - complex( 0., 1./2./dz/dz + (pot[index(j,i)] - e_charge*z[i]*efield_z )/4. )*dt )*phi[index(j,i)] 
-							- cz*phi[index(j,i+1)];
-			
-			
-			rv_z[Nz-1]	=	-az*phi[index(j,Nz-2)]  +
-							(1. - complex( 0., 1./2./dz/dz + (pot[index(j,Nz-1)] - e_charge*z[Nz-1]*efield_z )/4. )*dt )*phi[index(j,Nz-1)];
-			//Finishing right part Z
-			
-			
-			
-			
-			//Solving Triagonal Matrix	for Z
-			trid_simple(az, bz, cz, rv_z, phi_z, gamz, Nz);
-			
-			
-			
-			//Save function 
-			for (int i=0; i<Nz; i++)
-				phi[index(j,i)] = phi_z[i];
-		}//end loop Nr and Nz
+		}
+		
 	}//Z propagator imaginary time		
 	
 	
