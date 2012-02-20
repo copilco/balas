@@ -14,7 +14,7 @@ A6 = importdata('out6.txt');
 
 %% Grid parameters
 nr = 250; %A3(1);
-nz = 600; %A3(2);
+nz = 400; %A3(2);
 
 
 snap  = length(A3)/nr/nz;%1;%
@@ -154,8 +154,6 @@ end
 
 %%
 
-PHIQ = reshape(A0,nz,nr);
-
 krmax = 3;
 krmin = 0;
 kzmax = 3;
@@ -166,30 +164,47 @@ p0=sqrt(2*(wx-Ip));
 
 theta=0: (2*pi/(nz-1)): 2*pi;
 
+
 scrsz = get(0,'ScreenSize');
 figure('Position',[1 scrsz(4) scrsz(3)*0.5 scrsz(4)*0.8],...
     'Color','w');
-surf(KR,KZ,log10(PHIQ+1e-12),'FaceColor','interp','EdgeColor','none')
-view(2)
-axis tight
-daspect([1,1,1])
-hold on
-plot3(p0*cos(theta), p0*sin(theta),ones(1,nz)*(-9),'linewidth',5,'Color','w' )
-xlim([krmin krmax])
-ylim([kzmin kzmax])
+
+
+for j=1:4:Nsnap+2
+    
+    %clf
+    
+    %     scrsz = get(0,'ScreenSize');
+    %     figure('Position',[1 scrsz(4) scrsz(3)/2 scrsz(4)/1.25],...
+    %         'Color','w');
+    
+    PHIQ = reshape(A0(1+nr*nz*(j-1):nr*nz*j),nz,nr);
+    
+    
+    surf(KR,KZ,log10(PHIQ+1e-12),'FaceColor','interp','EdgeColor','none');
+    view(2)
+    axis tight
+    daspect([1,1,1])
+    hold on
+    plot3(p0*cos(theta), p0*sin(theta),ones(1,nz)*(-9),'linewidth',5,'Color','w' )
+    xlim([krmin krmax])
+    ylim([kzmin kzmax])
     
 
-h=gca;    
-set(h,'fontsize',16)
+    h=gca;
+    set(h,'fontsize',16)
 
-xlabel('k\rho (a.u.) ','fontsize',16)%,'fontweight','b')
-ylabel('kz (a.u.) ','fontsize',16)%,'fontweight','b')
+    xlabel('k\rho (a.u.) ','fontsize',16)%,'fontweight','b')
+    ylabel('kz (a.u.) ','fontsize',16)%,'fontweight','b')
 
-title('ElectronicWavePacket in momentum space','fontsize',16)
-h = colorbar('location','EastOutside');
-%set(get(h,'YLabel'),'String',' |\rho \phi |^2  ',...
-%    'fontsize',16)%,'fontweight','b');
-%caxis([-10 -6.5])
+    title('ElectronicWavePacket in momentum space','fontsize',16)
+    h = colorbar('location','EastOutside');
+    %set(get(h,'YLabel'),'String',' |\rho \phi |^2  ',...
+    %    'fontsize',16)%,'fontweight','b');
+    %caxis([-10 -6.5])
+
+end
+
 
 %%
 

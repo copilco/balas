@@ -10,7 +10,7 @@ nr = 520%A3(1);
 nz = 680%A3(2);
 
 Ntime = 1%A3(3);
-snap  = 6%A3(4);%1;%
+snap  = 10%A3(4);%1;%
 
 Nsnap = snap;%floor(Ntime/snap);
 
