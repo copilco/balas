@@ -217,23 +217,21 @@ public:
 				
 				//printf("Thread number %d is doing loop number %d.\n",tid,j);
 				
-				//Left part Z
-				for(int i=0; i<Nz; i++)	
-					bz[i]	=  1. + complex( 0., 1./2./dz/dz + pot[index(j,i)]/4. )*dt;
-				
-				
-				//Right part Z
 				rv_z[0]	= ( 1. - complex( 0., 1./2./dz/dz + pot[index(j,0)]/4. )*dt )*phi[index(j,0)] + 
 				- cz*phi[index(j,1)];
 				
+				bz[0]	=  1. + complex( 0., 1./2./dz/dz + pot[index(j,0)]/4. )*dt;			
 				
 				for (int i=1; i<Nz-1; i++)
+				{
+					bz[i]	=  1. + complex( 0., 1./2./dz/dz + pot[index(j,i)]/4. )*dt;
 					rv_z[i] = -az*phi[index(j,i-1)]+( 1. - complex(0., 1./2./dz/dz + pot[index(j,i)]/4. )*dt )*phi[index(j,i)] - cz*phi[index(j,i+1)];
+				}
 				
+				bz[Nz-1]	=  1. + complex( 0., 1./2./dz/dz + pot[index(j,Nz-1)]/4. )*dt;				
 				
-				rv_z[Nz-1] = -az*phi[index(j,Nz-2)]  + ( 1. - complex( 0., 1./2./dz/dz + pot[index(j,Nz-1)]/4. )*dt )*phi[index(j,Nz-1)];
-				//Finishing right part Z
-				
+				rv_z[Nz-1]  = - az*phi[index(j,Nz-2)]  
+				+ ( 1. - complex( 0., 1./2./dz/dz + pot[index(j,Nz-1)]/4. )*dt )*phi[index(j,Nz-1)];				
 				
 				//Solving Triagonal Matrix for Z
 				trid_simple( az, bz, cz, rv_z, phi_z, gamz, Nz );
@@ -243,13 +241,13 @@ public:
 				for (int i=0; i<Nz; i++)
 					phi[index(j,i)] = phi_z[i];
 			}//End loop Nr and Nz
-		
-		
+			
+			
 			mkl_free(rv_z);
 			mkl_free(bz);
 			mkl_free(phi_z);
 			mkl_free(gamz);
-		
+			
 		}
 		
 	}//Z propagator imaginary time	
@@ -270,7 +268,7 @@ public:
 		
 #pragma omp parallel shared(chunk,dt) private(tid)
 		{
-
+			
 			complex *rv_r=(complex*)mkl_malloc(Nr*sizeof(complex),16);
 			complex *phi_r=(complex*)mkl_malloc(Nr*sizeof(complex),16);
 			complex *br=(complex*)mkl_malloc(Nr*sizeof(complex),16);
@@ -286,29 +284,26 @@ public:
 				
 				//printf("Thread number %d is doing loop number %d.\n",tid,i);
 				
-				//Left part Rho
-				for( int j=0; j<Nr; j++ )
-					br[j] = 1. + complex(0., 1./2./dr/dr + pot[index(j,i)]/4. )*dt;
-				//End left part
-				
-				
-				//Right part Rho 
 				rv_r[0] = -ar[0]*phi[index(1,i)] +
 				(1.  -  complex(0., 1./dr/dr/2. + pot[index(0,i)]/4. )*dt)*phi[index(0,i)]
 				-cr[0]*phi[index(1,i)];			
 				
+				br[0]   = 1. + complex(0., 1./2./dr/dr + pot[index(0,i)]/4. )*dt;			
 				
 				
-				for (int j=1; j<Nr-1; j++) 
+				for (int j=1; j<Nr-1; j++)
+				{ 
+					br[j] = 1. + complex(0., 1./2./dr/dr + pot[index(j,i)]/4. )*dt;	
+					
 					rv_r[j]	= -ar[j]*phi[index(j-1,i)] + 
 					(1. -  complex( 0., 1./dr/dr/2. + pot[index(j,i)]/4. )*dt)*phi[index(j,i)]
 					-cr[j]*phi[index(j+1,i)];
+				}
 				
-				
+				br[Nr-1]   =  1. + complex(0., 1./2./dr/dr + pot[index(Nr-1,i)]/4. )*dt;			
 				
 				rv_r[Nr-1] =  -ar[Nr-1]*phi[index(Nr-2,i)]  +
 				(1.  -  complex( 0., 1./2./dr/dr + pot[index(Nr-1,i)]/4. )*dt)*phi[index(Nr-1,i)];
-				//Finishing right
 				
 				
 				//Solving Triagonal Matrix
@@ -362,28 +357,26 @@ public:
 			for (int j=0; j<Nr; j++ )
 			{
 				
-				//Left part Z
-				for(int i=0; i<Nz; i++)	
-					bz[i] = 1. + complex(0., 1./2./dz/dz + (pot[index(j,i)] + e_charge*e_charge*avsquare)/4. )*dt;
+				bz[0]    =   1. + complex(0., 1./2./dz/dz + (pot[index(j,0)] + e_charge*e_charge*avsquare)/4. )*dt;	
 				
-				
-				
-				
-				//Right part Z
-				rv_z[0]	  = (1. - complex(0., 1./2./dz/dz + (pot[index(j,0)] + e_charge*e_charge*avsquare )/4. )*dt)*phi[index(j,0)] 
+				rv_z[0]	 =  (1. - complex(0., 1./2./dz/dz + (pot[index(j,0)] + e_charge*e_charge*avsquare )/4. )*dt)*phi[index(j,0)] 
 				- cz*phi[index(j,1)];	
 				
 				
-				for (int i=1; i<Nz-1; i++) 
+				for (int i=1; i<Nz-1; i++) {
+					
+					bz[i]  =   1. + complex(0., 1./2./dz/dz + (pot[index(j,i)] + e_charge*e_charge*avsquare)/4. )*dt;				
+					
 					rv_z[i] =	-az*phi[index(j,i-1)]  + 
 					(1. - complex(0., 1./2./dz/dz + (pot[index(j,i)] + e_charge*e_charge*avsquare)/4. )*dt )*phi[index(j,i)] 
 					-cz*phi[index(j,i+1)];
+					
+				}
 				
+				bz[Nz-1]    =   1. + complex(0., 1./2./dz/dz + (pot[index(j,Nz-1)] + e_charge*e_charge*avsquare)/4. )*dt;			
 				
 				rv_z[Nz-1]	=	-az*phi[index(j,Nz-2)]  +
-				(1. - complex(0., 1./2./dz/dz + (pot[index(j,Nz-1)] + e_charge*e_charge*avsquare)/4.)*dt )*phi[index(j,Nz-1)];
-				//Finishing right part Z
-				
+				(1. - complex(0., 1./2./dz/dz + (pot[index(j,Nz-1)] + e_charge*e_charge*avsquare)/4.)*dt )*phi[index(j,Nz-1)];				
 				
 				//Solving Triagonal Matrix	for Z
 				trid_simple(az, bz, cz, rv_z, phi_z, gamz, Nz);
@@ -435,25 +428,26 @@ public:
 			for (int j=0; j<Nr; j++ )
 			{
 				
-				//Left part Z
-				for(int i=0; i<Nz; i++)
-					bz[i] = 1. + complex( 0., 1./2./dz/dz + (pot[index(j,i)] - e_charge*z[i]*efield_z )/4. )*dt;
+				bz[0]     =    1. + complex( 0., 1./2./dz/dz + (pot[index(j,0)] - e_charge*z[0]*efield_z )/4. )*dt;			
 				
-				
-				//Right part Z
-				rv_z[0]		=   (1. - complex( 0., 1./2./dz/dz + (pot[index(j,0)] - e_charge*z[0]*efield_z )/4. )*dt )*phi[index(j,0)] 
+				rv_z[0]   =   (1. - complex( 0., 1./2./dz/dz + (pot[index(j,0)] - e_charge*z[0]*efield_z )/4. )*dt )*phi[index(j,0)] 
 				- cz*phi[index(j,1)];
 				
 				
-				for (int i=1; i<Nz-1; i++) 
+				for (int i=1; i<Nz-1; i++)
+				{
+					bz[i] = 1. + complex( 0., 1./2./dz/dz + (pot[index(j,i)] - e_charge*z[i]*efield_z )/4. )*dt;				
+					
 					rv_z[i] =	- az*phi[index(j,i-1)]  + 
 					(1. - complex( 0., 1./2./dz/dz + (pot[index(j,i)] - e_charge*z[i]*efield_z )/4. )*dt )*phi[index(j,i)] 
 					- cz*phi[index(j,i+1)];
-			
+				}
 				
-				rv_z[Nz-1]	=	-az*phi[index(j,Nz-2)]  +
+				
+				bz[Nz-1]    =   1. + complex( 0., 1./2./dz/dz + (pot[index(j,Nz-1)] - e_charge*z[Nz-1]*efield_z )/4. )*dt;			
+				
+				rv_z[Nz-1]	=  -az*phi[index(j,Nz-2)]  +
 				(1. - complex( 0., 1./2./dz/dz + (pot[index(j,Nz-1)] - e_charge*z[Nz-1]*efield_z )/4. )*dt )*phi[index(j,Nz-1)];
-				//Finishing right part Z
 				
 				
 				//Solving Triagonal Matrix	for Z
