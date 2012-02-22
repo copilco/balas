@@ -23,7 +23,7 @@ int main()
     cout << "mainTestImaginaryHankelProp2D. Running example..." << endl;
     cout << "//////////////////////////////////////////////////" << endl;
     cout << "//////////////////////////////////////////////////" << endl;
-    
+	
     
     fstream axis("axis.txt",ios::out);
     fstream out0("out0.txt",ios::out);
@@ -222,9 +222,9 @@ int main()
 		ene1 = w.kinetic_energy(HH)+w.pot_energy();
 		
 		cout << "Energy (Expected value):  " << ene1 << "   Error: " << log10(abs(ene1-ene2)) << endl;
-		cout << "Norm after Transform  " << w.norm() << endl;
+		//cout << "Norm after Transform  " << w.norm() << endl;
 		
-		outEne << ene1 << "  " << log10(abs(ene1-ene2)) << endl;
+		//outEne << ene1 << "  " << log10(abs(ene1-ene2)) << endl;
 		
 		ene2=ene1;
 		
@@ -239,7 +239,9 @@ int main()
 		*/
 	}
 	
+	outEne << Nz << "  " << ene1 << "  " << log10(abs(ene1-ene2)) << endl;
 	
+	/*
     //////////////////////////////////////////////////////
 	//  Copy the ground state to another wavefunction   //
 	//////////////////////////////////////////////////////
@@ -277,12 +279,12 @@ int main()
 		////////////////////////////////////////////
 		// Take the snapshot of the wavefunction  //
 		////////////////////////////////////////////
-		/*
+		
 		if(ktime%(Ntime/(snap-1)) == 0)
 			for(int j=0;j<Nr;j++)
 				for(int i=0;i<Nz;i++)
 					out2 << abs(conj(wClone.phi[w.index(j,i)])*wClone.phi[w.index(j,i)])*wClone.r[j] << endl;	
-		*/
+		
 		
 		
 		// Projection of the two wavefunctions 
@@ -300,7 +302,7 @@ int main()
 		//w.absorber(0.1,0.1,0.1,0.1,1./6.);
 	
 	}
-	
+	*/
 	
 	axis.close();
     out0.close();
