@@ -20,7 +20,7 @@
 
 
 
-int main()
+int main(int argc, char *argv[])
 {   
    	
 	cout << "\n\n//////////////////////////////////////////////////" << endl;
@@ -55,14 +55,12 @@ int main()
     int Nz=200;//400;
     
     double dz  = 0.3;
-    double dr  = 0.3;//0.1+0.01*atof(argv[1]);//0.3;
+    double dr  = 0.1+0.01*atof(argv[1]);//0.3;
     complex dt = complex(0.,-0.05);
     
     
     int Ntime=5000;
     int snap=Ntime/100;
-    
-    
     
     
     //Gaussian parameters
@@ -141,11 +139,10 @@ int main()
     double ene2 = 0.;
     
 	
-    //////////////////////////////////////
+	//////////////////////////////////////
     //  Start imaginary temporal loop  //
     /////////////////////////////////////
 
-	
     for (int ktime=0; ktime<Ntime; ktime++)
 	{
 		
@@ -164,7 +161,7 @@ int main()
 		//  Write the error in the norm  
 		//************************************
 		
-		double ene1 = w.kinetic_energy_finite()+w.potential_energy();
+		ene1 = w.kinetic_energy_finite()+w.potential_energy();
 		
 		cout << "Energy (Expected value):  " << ene1 << "   Error: " << log10(abs(ene1-ene2)) << endl;
 		//cout << "Norm after Transform  " << w.norm() << endl;
@@ -182,7 +179,7 @@ int main()
 		
 	}//End propagation
 	
-	fprintf(outEne,"%d %12.5e %12.5e",Nr,ene1,log10(abs(ene1-ene2)));
+	fprintf(outEne,"%12.5e %12.5e %12.5e",dr,ene1,log10(abs(ene1-ene2)));
     
 	//w.binwrite(bwave);
 	
