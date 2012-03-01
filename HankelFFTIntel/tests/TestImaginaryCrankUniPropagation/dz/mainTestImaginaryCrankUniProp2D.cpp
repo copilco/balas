@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     int Nr=100;//250;
     int Nz=200;//400;
     
-    double dz  = 0.1+0.01*atof(argv[1]);//0.3;
+    double dz  = 0.01+0.01*atof(argv[1]);//0.3;
     double dr  = 0.3;
     complex dt = complex(0.,-0.05);
     
