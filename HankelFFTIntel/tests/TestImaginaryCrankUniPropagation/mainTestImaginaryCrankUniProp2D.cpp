@@ -38,11 +38,11 @@ int main()
 	
     //FILE *out3;
     //FILE *out4;
-    //FILE *bwave;
+    FILE *bwave;
     
     //out3=fopen("out3.txt","w");		 
     //out4=fopen("out4.txt","w");    
-    //bwave=fopen("binwave.bin","wb") ;
+    bwave=fopen("binwave.bin","wb") ;
     
 
 	FILE *outEne;
@@ -51,8 +51,8 @@ int main()
     //////////////////
     //  Parameters  //
     //////////////////    
-    int Nr=100;//250;
-    int Nz=200;//400;
+    int Nr=250;
+    int Nz=400;
     
     double dz  = 0.3;
     double dr  = 0.3;//0.1+0.01*atof(argv[1]);//0.3;
@@ -61,8 +61,6 @@ int main()
     
     int Ntime=5000;
     int snap=Ntime/100;
-    
-    
     
     
     //Gaussian parameters
@@ -164,7 +162,7 @@ int main()
 		//  Write the error in the norm  
 		//************************************
 		
-		double ene1 = w.kinetic_energy_finite()+w.potential_energy();
+		ene1 = w.kinetic_energy_finite()+w.potential_energy();
 		
 		cout << "Energy (Expected value):  " << ene1 << "   Error: " << log10(abs(ene1-ene2)) << endl;
 		//cout << "Norm after Transform  " << w.norm() << endl;
@@ -177,14 +175,14 @@ int main()
 		if(ktime%(Ntime/(snap-1)) == 0)
 			for (int j=0; j<Nr; j++)
 				for(int i=0; i<Nz; i++)
-					out1 << abs(conj(w.phi[w.index(j,i)])*w.phi[w.index(j,i)])*w.r[j] << endl		  
-		*/			
+					out1 << abs(conj(w.phi[w.index(j,i)])*w.phi[w.index(j,i)])*w.r[j] << endl;		  
+		*/
 		
 	}//End propagation
 	
 	fprintf(outEne,"%d %12.5e %12.5e",Nr,ene1,log10(abs(ene1-ene2)));
     
-	//w.binwrite(bwave);
+	w.binwrite(bwave);
 	
     out0.close();
     out1.close();

@@ -73,8 +73,8 @@ int main()
 	double cep   = 0.0  ;
 	
 	double t       = 0.;
-	double tmin    = 0.;//-1.2*periodx;
-	double tmax    =  ncycle*periodx;	
+	double tmin    = -1.2*periodx;
+	double tmax    = ncycle*periodx;	
 	
 	int snap=500;
     int Ntime =  floor( (tmax-tmin)/abs(dt) ) +1;
@@ -103,7 +103,7 @@ int main()
     ///////////////////////
 	
     HankelMatrix HH( Nr, Rmax );
-
+	HankelMatrix HGround(250, 150);
 	
     waveUniform2D w;
 	waveUniform2D wGround;
@@ -115,7 +115,7 @@ int main()
 	
     w.initialize(  HH, Nz, dz);
     w0.initialize( HH, Nz, dz);
-	wGround.initialize( HH, Nz, dz);
+	wGround.initialize( HGround, 400, dz);
 	w1.initialize( HH, Nz, dz);
 	
 	
@@ -149,18 +149,58 @@ int main()
 
   // --------------------------> Time Evolution <---------------------------- //
     
-	
-	//Preparing Crank-Nicholson arrrays
-    
-	w.PrepareCrankArrays(dt);
-    
-    
 	// Mask parameters
 	
     double masc0 = 15.;
     double masc1 = 30.;
 	double sigma_masc = 1.0 ;
-	double Energy1;
+	double Energy1 = 0.0;
+	double Energy2 = 0.0;
+	
+	//////////////////////////////////////
+    //  Start imaginary temporal loop  //
+    /////////////////////////////////////
+	
+	dt = complex(0.,-0.05);
+	
+	//Preparing Crank-Nicholson arrrays
+    
+	w.PrepareCrankArrays(dt);
+	
+	for (int ktime=0; ktime<1000; ktime++)
+	{
+		
+		cout << "Loop number: " << ktime << endl;
+		
+		///////////////
+		//  Evolve   //
+		///////////////
+		
+		w.Zprop(  dt/2. );
+		w.Rprop(  dt );
+		w.Zprop(  dt/2. );
+		w.normalize();	   
+		
+		//************************************
+		//  Write the error in the norm  
+		//************************************
+		
+		Energy1 = w.kinetic_energy_finite()+w.potential_energy();
+		
+		cout << "Energy (Expected value):  " << Energy1 << "   Error: " << log10(abs(Energy1-Energy2)) << endl;
+		
+		Energy2=Energy1;
+		
+		
+	}//End propagation
+
+	Energy1 = 0.0;
+	dt = complex(0.05,0.);
+	
+	//Preparing Crank-Nicholson arrrays
+    
+	w.PrepareCrankArrays(dt);
+	
 	
 	//Start Loop propagation on time
     
@@ -170,10 +210,10 @@ int main()
 		t= tmin + ktime*abs(dt);
 		
 		// Gausian pulse
-		//efieldz = efield0*exp(-t*t/sigmax/sigmax)*sin( wx*t + cep );
+		efieldz = efield0*exp(-t*t/sigmax/sigmax)*sin( wx*t + cep );
 		
 		// Sin^2 pulse
-		efieldz = efield0*sin(wx*t/2./ncycle)*sin(wx*t/2./ncycle)*sin(wx*t+cep);
+		//efieldz = efield0*sin(wx*t/2./ncycle)*sin(wx*t/2./ncycle)*sin(wx*t+cep);
 		
 		
 		avect_z+=-efieldz*abs(dt);
@@ -200,15 +240,14 @@ int main()
 	     	Energy1 = w.kinetic_energy_finite()+w.potential_energy();
 			
 			
-			cout << "  Energy = " << Energy1;
-			cout << "  Norm = "   << w.norm();
-	     	cout << "  Error in the norm of the WF = " << 1.-w.norm() ;
-			cout << "  Loop number= " << ktime << endl;
+			cout << "Loop number = " << ktime << "  Energy = " << Energy1 << "  Norm = " << w.norm() << "  Error in the norm = " << 1.-w.norm() << endl;
+		
 			
-			w.mask_function2D( w0, masc0, masc1, sigma_masc);			
+			w.mask_function2D( w0, masc0, masc1, sigma_masc);	
+			
 	       	out1 << ktime << "  " << 1.-w.norm() << " " << Energy1 << endl;
 			
-			out2 << ktime << "  " << w.norm() <<" "<< 1.-w.norm()-w0.norm()<<" "<< 1.-abs(projection(w, wGround ))  << endl;
+			out2 << ktime << "  " << 1.-w.norm() <<" "<< w.norm()-w0.norm()<<" "<< 1.-abs(projection(w, wGround ))  << endl;
 			
 			
 			//Snapshot full

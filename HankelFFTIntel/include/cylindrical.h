@@ -16,9 +16,9 @@ using namespace std;
 void placeWF( waveUniform2D &wlarge, waveUniform2D &wsmall)
 {	
 	int iplacer=floor((wlarge.Nz - wsmall.Nz)/2);
+	//int jplacer=floor((wlarge.Nr - wsmall.Nr)/2);
 	
-	
-	for(int i=0; i< wlarge.Nr*wlarge.Nz; i++)
+	for(int i=0; i<wlarge.Nr*wlarge.Nz; i++)
 		wlarge.phi[i]=complex(0.,0.);
 	
 	for(int j=0; j<wsmall.Nr; j++)
