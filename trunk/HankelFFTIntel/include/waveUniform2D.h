@@ -725,13 +725,21 @@ public:
 	//***********************************************
 	void binwrite(FILE *afile )
 	{		
+		double wreal;
+		double wimag;
+		
 		for(int j=0; j<Nr; j++)
-			for(int i=0; i<Nz; i++){
-				double wreal	= real(phi[index(j,i)]);
-				double wimag	= imag(phi[index(j,i)]);
+			for(int i=0; i<Nz; i++)
+			{
+				wreal = real(phi[index(j,i)]);
+				wimag = imag(phi[index(j,i)]);
 				
-				fwrite (&wreal , 1 , sizeof(wreal) , afile );
-				fwrite (&wimag , 1 , sizeof(wimag) , afile );
+				//fwrite(&wreal , 1 , sizeof(wreal) , afile );
+				//fwrite(&wimag , 1 , sizeof(wimag) , afile );
+				
+				fwrite(&wreal , sizeof(wreal) , 1 , afile );
+				fwrite(&wimag , sizeof(wimag) , 1 , afile );
+			
 			}
 	}//End Writer
 	
@@ -748,19 +756,20 @@ public:
 		double wimag;
 		
 		for(int j=0;j<Nr;j++)
-			for(int i=0;i<Nz;i++){
+			for(int i=0;i<Nz;i++)
+			{
+				//fread(&wreal , 1 , sizeof(wreal) , afile );
+				//fread(&wimag , 1 , sizeof(wimag) , afile );
 				
-				fread(&wreal , 1 , sizeof(wreal) , afile );
-				fread(&wimag , 1 , sizeof(wimag) , afile );
+				fread(&wreal , sizeof(wreal) , 1 , afile );
+				fread(&wimag , sizeof(wimag) , 1 , afile );
 				
 				real(phi[index(j,i)])	= wreal;
-				imag(phi[index(j,i)])	= wimag;			
-				
+				imag(phi[index(j,i)])	= wimag;		
 			}	
 	}//End reader	
 	
 
-	
 	//***********************************************
 	//				  Snapshot
 	//***********************************************	

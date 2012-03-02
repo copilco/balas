@@ -2,12 +2,13 @@
 
 clear all
 
+ax = importdata('axis.txt');
 A0 = importdata('out0.txt');
 A1 = importdata('out1.txt');
 %A2 = importdata('out2.txt');
-A3 = importdata('out3.txt');
-A4 = importdata('out4.txt'); 
-A5 = importdata('out5.txt'); 
+%A3 = importdata('out3.txt');
+%A4 = importdata('out4.txt'); 
+%A5 = importdata('out5.txt'); 
 
 
 %% Grid parameters
@@ -18,16 +19,16 @@ nz = 400; %A3(2);
 snap  = length(A3)/nr/nz;%1;%
 Nsnap = snap-1;%floor(Ntime/snap);
 
-r = A0(1:nr);
-z = A0(nr+1:nz+nr);
+r = ax(1:nr);
+z = ax(nr+1:nz+nr);
 
 [Z R] = meshgrid(z,r);
 
 dt = 0.05;
 
-t     = A5(:,1);
-Exuv  = A5(:,2);
-ksnap = floor(length(t)/snap);
+%t     = A5(:,1);
+%Exuv  = A5(:,2);
+%ksnap = floor(length(t)/snap);
 
 
 
@@ -48,7 +49,7 @@ for j=1:10:Nsnap
     %    'Color','w');    
     figure
     
-    PHI  = reshape(A3(1+nr*nz*(j-1):nr*nz*j),nz,nr);    
+    PHI  = reshape(A1(1+nr*nz*(j-1):nr*nz*j),nz,nr);    
     
     
     surfc(Z,R,log10(PHI'+1e-12),...

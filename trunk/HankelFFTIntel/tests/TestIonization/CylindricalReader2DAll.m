@@ -13,8 +13,8 @@ A5 = importdata('out5.txt');
 A6 = importdata('out6.txt'); 
 
 %% Grid parameters
-nr = 500; %A3(1);
-nz = 1000; %A3(2);
+nr = 100%500; %A3(1);
+nz = 200%1000; %A3(2);
 
 
 snap  = length(A3)/nr/nz;%1;%
@@ -60,12 +60,12 @@ for j=1:4:Nsnap+2
 %     figure('Position',[1 scrsz(4) scrsz(3)/2 scrsz(4)/1.25],...
 %         'Color','w');
     
-    PHI  = reshape(A3(1+nr*nz*(j-1):nr*nz*j),nr,nz);
+    PHI  = reshape(A3(1+nr*nz*(j-1):nr*nz*j),nz,nr);
     PHI_Mask  = reshape(A4(1+nr*nz*(j-1):nr*nz*j),nz,nr);
     
     
     subplot(3,4,[1 2 3 4] )
-    surfc(R,Z,log10(PHI'+1e-12),...
+    surfc(Z,R,log10(PHI'+1e-12),...
         'FaceColor','interp',...
         'EdgeColor','none')
     
