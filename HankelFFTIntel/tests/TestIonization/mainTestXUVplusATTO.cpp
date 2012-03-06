@@ -47,8 +47,8 @@ int main()
     //  Parameters  //
     //////////////////    
     
-	int Nr=500;
-    int Nz=1000;
+	int Nr=250;//500;
+    int Nz=400;//1000;
     
     double dz = 0.3;
     double dr = 0.3;
