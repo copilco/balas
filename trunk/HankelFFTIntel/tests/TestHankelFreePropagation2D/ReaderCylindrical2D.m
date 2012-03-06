@@ -7,11 +7,11 @@ A1 = importdata('out1.txt');
 
 %% 
 
-nr = 100%520;%A3(1);
-nz = 200%680;%A3(2);
+nr = 520;%A3(1);
+nz = 680;%A3(2);
 
 Ntime = 100%A3(3);
-snap  = 20%A3(4);%1;%
+snap  = 10%A3(4);%1;%
 
 Nsnap = snap;%floor(Ntime/snap);
 

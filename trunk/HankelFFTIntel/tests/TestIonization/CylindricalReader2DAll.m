@@ -1,3 +1,4 @@
+
 %% Reader cylindrical coordinate 2D
 
 clear all
@@ -13,8 +14,13 @@ A5 = importdata('out5.txt');
 A6 = importdata('out6.txt'); 
 
 %% Grid parameters
+<<<<<<< .mine
+nr = 250; %A3(1);
+nz = 400; %A3(2);
+=======
 nr = 100%500; %A3(1);
 nz = 200%1000; %A3(2);
+>>>>>>> .r47
 
 
 snap  = length(A3)/nr/nz;%1;%
