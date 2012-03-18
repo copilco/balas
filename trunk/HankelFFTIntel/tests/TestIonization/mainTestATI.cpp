@@ -1,5 +1,5 @@
 //
-//  mainTestUnitaryCrankUniProp2D.cpp
+//  mainTestATI.cpp
 //  
 //
 //  Created by de la Calle Negro Alejandro on 26/12/11.
@@ -21,12 +21,12 @@
 #include "cylindrical.h"
 #include "interp.h"
 
-int main()
+int main(int argc, char argv[])
 {   
 	
 	cout << "\n\n//////////////////////////////////////////////////" << endl;
     cout << "//////////////////////////////////////////////////" << endl;
-    cout << "mainTestXUVplusATTO. Running example..." << endl;
+    cout << "mainTestATI. Running example..." << endl;
     cout << "//////////////////////////////////////////////////" << endl;
     cout << "//////////////////////////////////////////////////" << endl;
    	
@@ -36,7 +36,7 @@ int main()
     fstream qaxes("qaxes.txt",ios::out);
 	fstream out0("out0.txt",ios::out);
     fstream out1("out1.txt",ios::out);
-    fstream out2("out2.txt",ios::out);
+    fstream out2("out2.txt",ios::out); 
     fstream out3("out3.txt",ios::out);    
     fstream out4("out4.txt",ios::out);
     fstream out5("out5.txt",ios::out);	
@@ -47,8 +47,8 @@ int main()
     //  Parameters  //
     //////////////////    
     
-	int Nr=250;//500;
-    int Nz=400;//1000;
+	int Nr=2000;
+    int Nz=3000;
     
     double dz = 0.3;
     double dr = 0.3;
@@ -70,15 +70,16 @@ int main()
 	int ncycle     = 2;
 	double sigmax  = ncycle*periodx/(8.*log(2.));
     double efield0 = sqrt( 5.0e14/(3.5e16) );
-	double cep   = 0.0  ;
+	double cep   = dospi*atof(argv[1])/20.;
 	
 	double t       = 0.;
 	double tmin    = -1.2*periodx;
-	double tmax    = ncycle*periodx;	
+	double tmax    = 1.5*ncycle*periodx;	
 	
-	int snap=500;
+	int snap=100;
     int Ntime =  floor( (tmax-tmin)/abs(dt) ) +1;
 	
+	int snapWave = floor(tmin+periodx/2/abs(dt));
 	
 	//Gaussian parameters
    
@@ -105,6 +106,7 @@ int main()
     HankelMatrix HH( Nr, Rmax );
 	HankelMatrix HGround(250, 150);
 	
+	
     waveUniform2D w;
 	waveUniform2D wGround;
 	waveUniform2D w0;
@@ -119,10 +121,8 @@ int main()
 	w1.initialize( HH, Nz, dz);
 	
 	
-	
 	FILE *bwave;
 	bwave=fopen("./binwave.bin","rb") ;
-	//w.binread(bwave);
 	wGround.binread(bwave);
 
 	placeWF( w, wGround);	
@@ -167,7 +167,7 @@ int main()
     
 	w.PrepareCrankArrays(dt);
 	
-	for (int ktime=0; ktime<1000; ktime++)
+	for (int ktime=0; ktime<1500; ktime++)
 	{
 		
 		cout << "Loop number: " << ktime << endl;
@@ -200,6 +200,12 @@ int main()
 	//Preparing Crank-Nicholson arrrays
     
 	w.PrepareCrankArrays(dt);
+	
+	FILE *finalwave;
+	
+	char name[40];
+	char number[3];
+	int nloop = 0;
 	
 	
 	//Start Loop propagation on time
@@ -251,22 +257,36 @@ int main()
 			
 			
 			//Snapshot full
-			w.snapshot(out3,1,1);
+			w.snapshot(out3,10,10);
 			
 			//Snapshot mask
-			w0.snapshot(out4,1,1);
+			w0.snapshot(out4,10,10);
 			
 			interpU2H(w0,w1);
-			w1.qsnapshot(out5,HH);
-			
+			w1.qsnapshot(out5,HH,10,10);
 			
 		}
 		
 		out6 << t << " " << efieldz <<endl;
 		
+		
+		if(ktime%snapWave==0)
+		{
+			
+			strcpy(name,"./finalwave");
+			sprintf(number,"%d",nloop);
+			strncat(name,number,2);
+			strncat(name,".bin",4);
+			finalwave=fopen(name,"w+");
+			w.binwrite(finalwave);
+			fclose(finalwave);
+			nloop++;
+		}
+		
+		
 	}//End loop propagation on time
 	
-	
+
 	
 	axes.close();
 	qaxes.close();

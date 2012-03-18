@@ -669,6 +669,19 @@ public:
 		return proj;
 	}
 	
+	/*
+	double projection_aceleration(waveH2D &wave1)
+	{
+		double proj = 0.0;
+		
+		for(int j=0;j<Nr;j++)
+			for(int i=0;i<Nz;i++)
+				proj+=dz*dr[j]*r[j]*real(conj(wave1.phi[index(j,i)])*grad_pot[index(j,i)]*phi[index(j,i)]);
+		
+		
+		return proj;
+	}
+	*/
 	
 	/****************************/	
 	//   Utility functions      //

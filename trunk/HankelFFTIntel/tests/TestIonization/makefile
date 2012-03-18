@@ -1,19 +1,31 @@
 MKLROOT=/opt/intel/mkl
 COMPOSERLIB=/opt/intel/composer_xe_2011_sp1.9.289/
 DYLD_LIBRARY_PATH=/opt/intel/composer_xe_2011_sp1.9.289/compiler/lib
-MKL_NUM_THREADS=4
+MKL_NUM_THREADS=8
 
-XUVatto: mainTestXUVplusATTO.cpp clean
+ATI: mainTestATI.cpp clean
 	 export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH); \
-	 icpc mainTestXUVplusATTO.cpp -L$(MKLROOT)/lib -I../../include  -I$(MKLROOT)/include $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a -liomp5 -lpthread -lm -openmp -o mainTestXUVplusATTO
+	 icpc mainTestATI.cpp -L$(MKLROOT)/lib -I../../include  -I$(MKLROOT)/include $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a -liomp5 -lpthread -lm -openmp -o mainTestATI
 	export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH); \
-	time -p ./a.out mainTestXUVplusATTO
+	time -p ./mainTestATI
 
 attoCrank: AttoCrank2D.cpp clean
 	 export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH); \
 	 icpc AttoCrank2D.cpp -L$(MKLROOT)/lib -I../../include  -I$(MKLROOT)/include $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a -liomp5 -lpthread -lm -openmp -o AttoCrank2D
 	export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH); \
 	time -p ./AttoCrank2D
+
+analysis: mainAnalysis.cpp clean
+	 export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH); \
+	 icpc mainAnalysis.cpp -L$(MKLROOT)/lib -I../../include  -I$(MKLROOT)/include $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a -liomp5 -lpthread -lm -openmp -o mainAnalysis
+	export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH); \
+	time -p ./mainAnalysis
+
+analysis2: mainAnalysis2.cpp clean
+	 export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH); \
+	 icpc mainAnalysis2.cpp -L$(MKLROOT)/lib -I../../include  -I$(MKLROOT)/include $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a $(MKLROOT)/lib/libmkl_intel_lp64.a $(MKLROOT)/lib/libmkl_intel_thread.a $(MKLROOT)/lib/libmkl_core.a -liomp5 -lpthread -lm -openmp -o mainAnalysis2
+	export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH); \
+	time -p ./mainAnalysis2
 
 .PHONY: clean
 clean:
