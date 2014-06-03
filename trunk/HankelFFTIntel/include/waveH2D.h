@@ -740,7 +740,7 @@ public:
 		for(int j=0;j<Nr/skiper2;j++)
 			for(int i=0;i<Nz/skiper1;i++)
 			{
-				norm=dz*dr[j]*r[j]*real(conj(phi[index(j*skiper2,i*skiper1)])*phi[index(j*skiper2,i*skiper1)]);
+				norm=dz*dr[j*skiper2]*r[j*skiper2]*real(conj(phi[index(j*skiper2,i*skiper1)])*phi[index(j*skiper2,i*skiper1)]);
 				file << norm << endl;
 			}
 		
@@ -758,7 +758,7 @@ public:
 		for(int j=0;j<Nr/skiper2;j++)
 			for(int i=0;i<Nz/skiper1;i++)
 			{
-				qnorm=dq*dv[j]*v[j]*real(conj(phik[index(j*skiper2,i*skiper1)])*phik[index(j*skiper2,i*skiper1)]);
+				qnorm=dq*dv[j*skiper2]*v[j*skiper2]*real(conj(phik[index(j*skiper2,i*skiper1)])*phik[index(j*skiper2,i*skiper1)]);
 				file << qnorm << endl;
 			}
 		

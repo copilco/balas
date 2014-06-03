@@ -280,7 +280,7 @@ public:
 				pot[index(j,i)]= charge_electron_au*zmol1/sqrt( soft_core1 + r[j]*r[j] + (z[i]+shift-R)*(z[i]+shift-R) ) +
 				charge_electron_au*zmol2/sqrt( soft_core2 + r[j]*r[j] + (z[i]+shift)*(z[i]+shift) );
 		
-	}//End Hydrogen potential	
+	};//End Hydrogen potential	
 	
 	
 	
@@ -306,7 +306,7 @@ public:
 		for(int i=0;i<Nr*Nz;i++)
 		{
 			phi[i]=phi[i]/sqrt(norm1);
-		}
+		};
 	};
 	
 	
@@ -702,7 +702,7 @@ public:
 		for(int j=0;j<Nr/skiper2;j++)
 			for(int i=0;i<Nz/skiper1;i++)
 			{
-				norm=dz*dr[j]*r[j]*real(conj(phi[index(j*skiper2,i*skiper1)])*phi[index(j*skiper2,i*skiper1)]);
+				norm=dz*dr[j*skiper2]*r[j*skiper2]*real(conj(phi[index(j*skiper2,i*skiper1)])*phi[index(j*skiper2,i*skiper1)]);
 				file << norm << endl;
 			}
 		
@@ -722,7 +722,7 @@ public:
 		for(int j=0;j<Nr/skiper2;j++)
 			for(int i=0;i<Nz/skiper1;i++)
 			{
-				qnorm=dq*dv[j]*v[j]*real(conj(phik[index(j*skiper2,i*skiper1)])*phik[index(j*skiper2,i*skiper1)]);
+				qnorm=dq*dv[j*skiper2]*v[j*skiper2]*real(conj(phik[index(j*skiper2,i*skiper1)])*phik[index(j*skiper2,i*skiper1)]);
 				file << qnorm << endl;
 			}
 		
