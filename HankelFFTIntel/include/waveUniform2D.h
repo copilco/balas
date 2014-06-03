@@ -740,8 +740,8 @@ public:
 				fwrite(&wreal , sizeof(wreal) , 1 , afile );
 				fwrite(&wimag , sizeof(wimag) , 1 , afile );
 			
-			}
-	}//End Writer
+			};
+	};//End Writer
 	
 	
 	
@@ -781,7 +781,7 @@ public:
 		for(int j=0;j<Nr/skiper2;j++)
 			for(int i=0;i<Nz/skiper1;i++)
 			{
-				norm=dz*dr*r[j]*real(conj(phi[index(j*skiper2,i*skiper1)])*phi[index(j*skiper2,i*skiper1)]);
+				norm=dz*dr*r[j*skiper2]*real(conj(phi[index(j*skiper2,i*skiper1)])*phi[index(j*skiper2,i*skiper1)]);
 				file << norm << endl;
 			}
 		

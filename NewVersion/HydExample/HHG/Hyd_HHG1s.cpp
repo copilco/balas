@@ -102,15 +102,15 @@ int main (int argc, char * const argv[])
 	
 	
 	//First pulse Laser
-	fpulse.I0[0]      = I0;					// Intensity W/cm^2 
-	fpulse.e[0]       = 0.00;				// Elliptical of the pulse
-	fpulse.w0[0]      = wfreq;              // Central frequency
-   	fpulse.cycles0[0] = ncycle;				// Cycles number
-   	fpulse.cep0[0]    = cep;				// Carrier Envelop Phase
-	fpulse.phi_rel[0] = 0.;					// Relative phase between the polarization Ex and Ey
+	fpulse.I0[0]		= I0;					// Intensity W/cm^2 
+	fpulse.e[0]			= 0.00;				// Elliptical of the pulse
+	fpulse.w0[0]		= wfreq;              // Central frequency
+   	fpulse.cycles0[0]	= ncycle;				// Cycles number
+   	fpulse.cep0[0]		= cep;				// Carrier Envelop Phase
+	fpulse.phi_rel[0]	= 0.;					// Relative phase between the polarization Ex and Ey
 	
 		
-	fpulse.envelope[0]=env_name;            // Envelop name
+	fpulse.envelope[0]	= env_name;            // Envelop name
 	
 	
    	fpulse.laser_pulses(realdt, tstart,  offset,  outset);  // Making the linear polarization pulse Ey
@@ -142,7 +142,9 @@ int main (int argc, char * const argv[])
     //End save the laser pulse	
 	
 	
-	//Laser parameters
+	
+	
+	//Laser parameters // 
 	fprintf(out9,"%e %e %e %e %e %e ", 
 			fpulse.I0[0], fpulse.w0[0], 
 			fpulse.cycles0[0], fpulse.cep0[0], 
