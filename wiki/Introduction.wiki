@@ -2,7 +2,8 @@
 
 = Introduction =
 
-This library is created with the aim to solve numerically the time-dependent Schrodinger Equation in cylindrical coordinates. Several physical problems can be addressed under the cylindrical symmetry. 
+This library is created with the aim to solve numerically the time-dependent Schrodinger equation (TDSE) in cylindrical coordinates. The numerical integration of the TDSE allow us to study the laser-matter interaction and with it several physical processes such a the electron ionization induced by a strong infrared laser field from atoms or molecules. 
+Several physical problems can be addressed under the cylindrical symmetry. 
 
 
 
