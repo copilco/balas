@@ -14,6 +14,7 @@
 #include <complex>
 #include <math.h>
 #include <stdio.h>
+#include "silo.h"
 #include <new>
 #include "omp.h"
 #define MKL_Complex16 std::complex<double>
@@ -44,7 +45,36 @@ public:
 	complex *br, *gamr;
 	complex *bz, *gamz;
 	
+	//double **coords;
+	double *xcoord;//		= ( double* ) malloc( NX*NY*NZ*sizeof(double) );
+	double *ycoord;//		= ( double* ) malloc( NX*NY*NZ*sizeof(double) );
+	double *zcoord;//		= ( double* ) malloc( NX*NY*NZ*sizeof(double) );		
+	double *edensity;//      = ( double* ) malloc( NX*NY*NZ*sizeof(double) );	
 	
+	//Constructor 
+	waveUniform2D()
+	{
+		r		= NULL;
+		z		= NULL;
+		
+		xcoord	= NULL;
+		ycoord	= NULL;
+		zcoord	= NULL;
+		edensity= NULL;
+		
+		phi		= NULL;
+		pot		= NULL;		
+		
+		rv_r	= NULL;
+		rv_z	= NULL;
+		
+		phi_r	= NULL;
+		br		= NULL; 
+		gamr	= NULL;
+		bz		= NULL;
+		gamz	= NULL;
+		
+	};
 	
 	/***********************************************************/	
 	//	Fill the arrays and copy the grids in rho and k_rho
@@ -53,7 +83,12 @@ public:
 	{
 		int indexer=j*Nz+i;
 		return indexer;
-	}
+	};
+	
+	int index3D(int k, int j, int i, int NY, int NZ)
+	{
+		return k*NY*NZ+j*NZ+i;
+	};	
 	
 	void initialize(HankelMatrix &HH,int _Nz,double _dz)
 	{
@@ -72,6 +107,8 @@ public:
 		
 		r		= (double*)mkl_malloc(  Nr*sizeof(double),16);
 		z		= (double*)mkl_malloc(  Nz*sizeof(double),16);
+		
+		//*coords	= (double*)mkl_malloc( 3*sizeof(double),16 );
 		
 		
 		phi		= (complex*)mkl_malloc( Nz*Nr*sizeof(complex),16);
@@ -175,7 +212,7 @@ public:
 		int chunk = Nodes;
 									
 		
-#pragma omp parallel for shared(chunk,dt) schedule(dynamic,chunk)
+//#pragma omp parallel for shared(chunk,dt) schedule(dynamic,chunk)
 		for( int i=0; i<Nr; i++ )
 		{						
 			ar[i]     =    complex( 0., - 1./dr/dr/4. + 1./dr/r[i]/8. )*dt;				
@@ -262,9 +299,7 @@ public:
 				
 
 			};//End loop Nr and Nz
-			
-			
-			
+		
 		};//End of the pragma
 		
 	};//Z propagator imaginary time	
@@ -1177,9 +1212,9 @@ public:
 				if(x>x1)
 					wp.phi[index(j,i)]=phi[index(j,i)];
 				
-			}
+			};
 		
-	}//End mask function 2D
+	};//End mask function 2D
 	
 	
 	
@@ -1204,9 +1239,9 @@ public:
 				if(x>x1)
 					wp.phi[index(j,i)]=complex(.0,.0);
 				
-			}
+			};
 		
-	}//End mask function 2D		
+	};//End mask function 2D		
 	
 	
 	
@@ -1284,10 +1319,10 @@ public:
 				{		  
 					real(phi[index(j,i)])*=mask_r_right;	
 					imag(phi[index(j,i)])*=mask_r_right;	
-				}
+				};
 				
 			};//End the loop on ij
-	}//End absorver
+	};//End absorver
 	
 	
 	
@@ -1311,10 +1346,10 @@ public:
 				//fwrite(&wreal , sizeof(wreal) , 1 , afile );
 				//fwrite(&wimag , sizeof(wimag) , 1 , afile );
 			
-			}
+			};
 		
 		fflush(afile);
-	}//End Writer
+	};//End Writer
 	
 	
 	
@@ -1339,9 +1374,9 @@ public:
 				
 				real(phi[index(j,i)])	= wreal;
 				imag(phi[index(j,i)])	= wimag;		
-			}	
+			};	
 		fflush(afile);
-	}//End reader	
+	};//End reader	
 	
 
 	//***********************************************
@@ -1355,12 +1390,225 @@ public:
 		for(int j=0;j<Nr/skiper2;j++)
 			for(int i=0;i<Nz/skiper1;i++)
 			{
-				norm=dz*dr*r[j*skiper2]*real(conj(phi[index(j*skiper2,i*skiper1)])*phi[index(j*skiper2,i*skiper1)]);
+				norm=dz*dr*r[j*skiper2]*pow( abs(phi[index(j*skiper2,i*skiper1)] ), 2.);
 				file << norm << endl;
 			};
 		
 		file.flush();
 	};
+	
+
+	
+	void silo_axes(double mintheta, double maxtheta, int Ntheta, int skiper1, int skiper2)
+	{
+		
+		if(mintheta < 0.)
+		{
+			cout << "\n***********************\n Take care \n";			
+			cout << "\nmintheta must be > 0 \n";
+			exit(1);
+		};
+		
+		if(maxtheta > dospi)
+		{
+			cout << "\n***********************\n Take care \n";
+			cout << "\n\nmaxtheta must be < 2*pi \n\n";
+			exit(1);
+		};		
+		
+		int NX			= Nz/skiper1;
+		int NY			= Nr/skiper2;
+		int NZ			= Ntheta;
+		
+		double theta	= 0.;		
+		double dtheta	= (maxtheta-mintheta)/((double)(Ntheta-1));
+		
+		
+		xcoord			= ( double* ) mkl_malloc( NX*NY*NZ*sizeof(double),16 );
+		ycoord			= ( double* ) mkl_malloc( NX*NY*NZ*sizeof(double),16 );
+		zcoord			= ( double* ) mkl_malloc( NX*NY*NZ*sizeof(double),16 );		
+		edensity		= ( double* ) mkl_malloc( NX*NY*NZ*sizeof(double),16 );	
+		
+				
+		
+		for(int k=0;k<NZ;k++)
+		{
+			theta = mintheta + k*dtheta;
+			for (int j=0; j<NY; j++) 
+			{
+				for (int i=0; i<NX; i++) 
+				{
+
+					xcoord[index3D(k,j,i,NY,NX)] = r[j*skiper2]*cos(theta);
+					ycoord[index3D(k,j,i,NY,NX)] = r[j*skiper2]*sin(theta);
+					zcoord[index3D(k,j,i,NY,NX)] = z[i*skiper1];
+					
+				};
+			};
+		};
+		/*
+		
+		coords[0] = xcoord;
+		coords[1] = ycoord;
+		coords[2] = ycoord;		*/
+		
+
+	};
+	
+	
+	//***********************************************
+	//			  Snapshot On Silo File 
+	//***********************************************	
+	void snapshot_silo_file(double mintheta, double maxtheta, int Ntheta, int ksnapshot, double t, int skiper1=1,int skiper2=1)
+	{
+
+		DBfile *dbfile = NULL; // Open the silo file
+		DBoptlist *optList;		
+		
+		double *coords[3];
+		
+		coords[0] = xcoord;
+		coords[1] = ycoord;
+		coords[2] = zcoord;					//*/
+		
+		
+		int NX			= Nz/skiper1;
+		int NY			= Nr/skiper2;
+		int NZ			= Ntheta;
+		
+		char filename[80];		
+		
+		double eDensity = 0.0;
+		double dtheta   = (maxtheta-mintheta)/( (double)(Ntheta-1) );
+		
+		for(int k=0; k<NZ; k++)
+			for(int j=0;j<NY;j++)
+				for(int i=0;i<NX;i++)
+				{
+					eDensity  = log10(dtheta*dz*dr*r[j*skiper2]*pow( abs( phi[index(j*skiper2,i*skiper1)] ), 2. )+1.e-14);
+					edensity[index3D(k,j,i,NY,NX)]  = eDensity;
+				};
+		
+		
+		
+		//Creating a file that contain the mesh and variable//
+		sprintf(filename, "edensity%.4d.silo", ksnapshot );
+		printf("\n....\nCreating Electron Density File \"%s\".\n\n", filename  );	
+		dbfile = DBCreate(filename, 
+						  DB_CLOBBER, 
+						  DB_LOCAL, 
+						  "Laser-Atom Interaction ", 
+						  DB_HDF5);
+		
+		
+		int ndims			= 3;
+		int dims[3];
+		char *coordnames[3] ={"x","y","z"};
+		
+		
+		dims[0]				= NX ;
+		dims[1]				= NY ;
+		dims[2]				= NZ ;
+		
+		
+		optList				= DBMakeOptlist(10);
+		DBAddOption(optList, DBOPT_DTIME, &t);
+		
+		
+		
+		DBPutQuadmesh(dbfile, "quadmesh", coordnames, 
+					  coords, dims, ndims,
+					  DB_DOUBLE, DB_NONCOLLINEAR, optList );	
+		
+		
+		DBPutQuadvar1(dbfile, "EDensity", "quadmesh", 
+					  edensity, dims, ndims, NULL,
+					  0, DB_DOUBLE, DB_NODECENT, optList );
+
+		DBPutQuadvar1(dbfile, "EDensity2", "quadmesh", 
+					  edensity, dims, ndims, NULL,
+					  0, DB_DOUBLE, DB_NODECENT, optList );		
+		
+		DBFreeOptlist(optList);	
+		DBClose(dbfile);
+	};//*/
+	
+	
+	
+	//***********************************************
+	//			  Snapshot On Silo File 
+	//***********************************************	
+	void save_potential_silo_file(double mintheta, double maxtheta, int Ntheta, int ksnapshot, double t, int skiper1=1,int skiper2=1)
+	{
+		
+		
+		DBfile *dbfile = NULL; // Open the silo file
+		DBoptlist *optList;		
+		
+		double *coords[3];
+		
+		coords[0] = xcoord;
+		coords[1] = ycoord;
+		coords[2] = zcoord;	//*/
+		
+		
+		int NX			= Nz/skiper1;
+		int NY			= Nr/skiper2;
+		int NZ			= Ntheta;
+		
+		char filename[80];		
+		
+		double eDensity = 0.0;
+		double dtheta   = (maxtheta-mintheta)/( (double)(Ntheta-1) );
+		
+		for(int k=0; k<NZ; k++)
+			for(int j=0;j<NY;j++)
+				for(int i=0;i<NX;i++)
+				{
+					eDensity  = pot[index(j*skiper2,i*skiper1)];
+					edensity[index3D(k,j,i,NY,NX)]  = eDensity;
+				};
+		
+		
+		
+		//Creating a file that contain the mesh and variable//
+		sprintf(filename, "Potential%.4d.silo", ksnapshot );
+		printf("\n....\nCreating Potential file \"%s\".\n\n", filename  );	
+		dbfile = DBCreate(filename, 
+						  DB_CLOBBER, 
+						  DB_LOCAL, 
+						  "Potential System ", 
+						  DB_HDF5);
+		
+		
+		int ndims			= 3;
+		int dims[3];
+		char *coordnames[3] ={"x","y","z"};
+		
+		
+		dims[0]				= NX ;
+		dims[1]				= NY ;
+		dims[2]				= NZ ;
+		
+		
+		optList				= DBMakeOptlist(10);
+		DBAddOption(optList, DBOPT_DTIME, &t);
+		
+		
+		
+		DBPutQuadmesh(dbfile, "quadmesh", coordnames, 
+					  coords, dims, ndims,
+					  DB_DOUBLE, DB_NONCOLLINEAR, optList );	
+		
+		
+		DBPutQuadvar1(dbfile, "EDensity", "quadmesh", 
+					  edensity, dims, ndims, NULL,
+					  0, DB_DOUBLE, DB_NODECENT, optList );
+		
+		DBFreeOptlist(optList);	
+		DBClose(dbfile);
+	};	//*/
+	
 	
 	void snapshot_square_wave(fstream &file,int skiper1=1,int skiper2=1)
 	{
@@ -1425,27 +1673,37 @@ public:
 	
 	void free_memory()
 	{
+		if(r!=NULL)
+		{
+			mkl_free(r);
+			mkl_free(z);
 		
-		mkl_free(r);
-		mkl_free(z);
+			mkl_free(phi);	
+			mkl_free(pot);
+		};
 		
-		mkl_free(phi);	
-		mkl_free(pot);
+		if (ar!=NULL)	mkl_free(ar);
 		
-		mkl_free(ar);
-		mkl_free(br);
-		mkl_free(cr);
+		if (br!=NULL)	mkl_free(br);
+		if (cr!=NULL)	mkl_free(cr);
 		
-		mkl_free(rv_r);	
-		mkl_free(phi_r);
-		mkl_free(gamr);			
-		
-		
-		mkl_free(rv_z);		
-		mkl_free(bz);
-		mkl_free(gamz);	
+		if (rv_r!=NULL)	mkl_free(rv_r);	
+		if (phi_r!=NULL)mkl_free(phi_r);
+		if (gamr!=NULL)	mkl_free(gamr);			
 		
 		
+		if (rv_z!=NULL)	mkl_free(rv_z);		
+		if (bz!=NULL)	mkl_free(bz);
+		if (bz!=NULL)	mkl_free(gamz);	
+		
+		
+		if(xcoord!=NULL)
+		{
+			mkl_free(xcoord);
+			mkl_free(ycoord);
+			mkl_free(zcoord);
+			mkl_free(edensity);
+		};//*/
 	};
 	
 	
