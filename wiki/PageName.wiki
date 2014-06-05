@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary Crank Nicholson and Split Operator Methods.
 
 = Numerical algorithms  =
 
