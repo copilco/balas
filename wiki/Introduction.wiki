@@ -6,9 +6,7 @@ This library is created with the aim to solve numerically the time-dependent Sch
 
 Several physical problems can be addressed under the cylindrical symmetry if the laser electric field is linearly polarized along the longitudinal axis: "z". In this context, the wavefunction of the system can be described by two coordinates the "\rho" and "z", and the evolution of the wavefunction along the "\theta" coordinate is not taken into account. It is because throughout the time evolution, the magnetic quantum number (m=0) is equal to zero. 
 
-- The numeric algorithms 
-    (i)  Crank Nicholson method
-    (ii) Spectral split operator method:  Fast Fourier Transform and Fast Hankel Transform
+
 
 - Implementation in C++
    (i)  Classes and Objects development 
