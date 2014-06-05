@@ -4,6 +4,7 @@
 
 This page will contain the description of the numerical algorithm:
     -  Crank Nicholson method
+
     -  Spectral split operator method:  Fast Fourier Transform and Fast Hankel Transform. 
 
 
